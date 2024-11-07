@@ -157,6 +157,7 @@ auth:
     clientId: #<client_name_in_oidc_provider>
     clientSecret: #<client_secret_in_oidc_provider>
     claimIdentifyingUser: email
+    claimGroups: groups
     admin: nifi@example.com
     preferredJwsAlgorithm:
     ## Request additional scopes, for example profile
