@@ -1,6 +1,6 @@
-const { it } = require('mocha')
-const puppeteer = require ('puppeteer-core')
-const expect = require('chai').expect
+const { it } = import('mocha')
+const puppeteer = import('puppeteer-core')
+const expect = import('chai').expect
 
 describe('NiFi Login via OIDC', () => {
     let browser
