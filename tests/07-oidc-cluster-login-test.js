@@ -1,6 +1,6 @@
-import { it } from 'mocha'
-import { puppeteer } from 'puppeteer-core'
-import { expect } from 'chai'
+import it from 'mocha';
+import puppeteer from 'puppeteer-core';
+import expect from 'chai';
 
 describe('NiFi Login via OIDC', () => {
     let browser
