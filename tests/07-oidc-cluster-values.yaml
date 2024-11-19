@@ -1,3 +1,10 @@
+service:
+  type: "ClusterIP"
+  httpsPort: "8443"
+  processors:
+    enabled: true
+    ports: []
+
 zookeeper:
   enabled: true
 
@@ -19,6 +26,8 @@ replicaCount: 3
 properties:
   webProxyHost: ingress-nginx-controller.ingress-nginx.svc.cluster.local
   isNode: true
+  httpsPort: 8091
+  clusterSecure: true
 
 auth:
   oidc:
@@ -28,6 +37,7 @@ auth:
     clientSecret: CZhA1IOePlXHz3PWqVwYoVAcYIUHTcDK
     admin: nifi@example.com
     claimIdentifyingUser: email
+    claimGroups: groups
 
 ingress:
   enabled: true

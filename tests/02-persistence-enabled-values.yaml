@@ -1,2 +1,13 @@
+service:
+  type: "ClusterIP"
+  httpPort: "8080"
+  processors:
+    enabled: true
+    ports: []
+    
+properties:
+  httpPort: 8080
+  clusterSecure: false
+
 persistence:
   enabled: true

@@ -1,3 +1,10 @@
+service:
+  type: "ClusterIP"
+  httpsPort: "8443"
+  processors:
+    enabled: true
+    ports: []
+
 zookeeper:
   enabled: false
 
@@ -12,9 +19,12 @@ auth:
     clientSecret: CZhA1IOePlXHz3PWqVwYoVAcYIUHTcDK
     admin: nifi@example.com
     claimIdentifyingUser: email
+    claimGroups: groups
 
 properties:
   webProxyHost: nifi.default.svc.cluster.local:8443
+  httpsPort: 8091
+  clusterSecure: true
 
 sts:
   startupProbe:

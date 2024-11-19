@@ -1,3 +1,13 @@
+service:
+  type: "ClusterIP"
+  httpPort: "8080"
+  processors:
+    enabled: true
+    ports: []
+    
 properties:
   safetyValve:
     nifi.content.claim.max.appendable.size: "1 B"
+  httpPort: 8080
+  clusterSecure: false
+  

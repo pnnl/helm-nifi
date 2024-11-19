@@ -1,8 +1,19 @@
+service:
+  type: "ClusterIP"
+  httpsPort: "8443"
+  processors:
+    enabled: true
+    ports: []
+    
 zookeeper:
   enabled: false
 
 registry:
   enabled: false
+
+properties:
+  httpsPort: 8091
+  clusterSecure: true
 
 auth:
   ldap:
