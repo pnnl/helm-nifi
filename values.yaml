@@ -91,6 +91,7 @@ properties:
   # use externalSecure for when inbound SSL is provided by nginx-ingress or other external mechanism
   externalSecure: false
   isNode: false
+  httpPort: 8080
   httpsPort: 8443
   webProxyHost: # <clusterIP>:<NodePort> (If Nifi service is NodePort or LoadBalancer)
   clusterPort: 6007
@@ -101,12 +102,15 @@ properties:
   zookeeperSessionTimeout: '3 secs'
   archiveMaxRetentionPeriod: "3 days"
   archiveMaxUsagePercentage: "85%"
+  clusterSecure: false # set to true if ldap is enabled
+  needClientAuth: false
   provenanceStorage: "8 GB"
   provenanceMaxStorageTime: "10 days"
   flowArchiveMaxTime: "30 days"
   flowArchiveMaxStorage: "500 MB"
   siteToSite:
     port: 10000
+  authorizer: managed-authorizer
   # use properties.safetyValve to pass explicit 'key: value' pairs that overwrite other configuration
   safetyValve:
     #nifi.variable.registry.properties: "${NIFI_HOME}/example1.properties, ${NIFI_HOME}/example2.properties"
@@ -193,6 +197,7 @@ headless:
 # ui service
 service:
   type: ClusterIP
+  httpPort: 8080
   httpsPort: 8443
   # nodePort: 30236
   annotations: {}

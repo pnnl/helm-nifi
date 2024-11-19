@@ -3,6 +3,7 @@
 {{- $fullName := include "apache-nifi.fullname" $ -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $ingressHttpsPort := .Values.service.httpsPort -}}
+{{- $ingressHttpPort := .Values.service.httpPort -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -32,6 +33,7 @@ spec:
   {{- end }}
 {{- end }}
   rules:
+{{- if .Values.properties.clusterSecure}}
   {{- range .Values.ingress.hosts }}
     - host: {{ . }}
       http:
@@ -39,9 +41,19 @@ spec:
           - path: {{ $ingressPath }}
             pathType: Prefix
             backend:
-              service:
-                name: {{ $fullName }}
-                port: 
-                  number: {{ $ingressHttpsPort }}
+              serviceName: {{ $fullName }}
+              servicePort: {{ $ingressHttpsPort }}
   {{- end }}
+{{- else}}
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            pathType: Prefix
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: {{ $ingressHttpPort }}
+  {{- end }}
+{{- end }}
 {{- end }}

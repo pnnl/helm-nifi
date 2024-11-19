@@ -101,6 +101,62 @@ spec:
             sleep 2
           done
 {{- end }}
+{{- if .Values.ca.enabled }}
+      - name: cert-request
+        imagePullPolicy: {{ .Values.ca.image.pullPolicy | quote }}
+        image: "{{ .Values.ca.image.repository }}:{{ .Values.ca.image.tag }}"
+        command:
+        - bash
+        - -c
+        - |
+          CA_ADDRESS="{{ template "ca.server" . }}:{{ .Values.ca.service.port }}"
+          until echo "" | timeout -t 2 openssl s_client -connect "${CA_ADDRESS}"; do
+            # Checking if ca server using nifi-toolkit is up
+            echo "Waiting for CA to be available at ${CA_ADDRESS}"
+            sleep 2
+          done;
+          cd /data/config-data
+          rm -rf certs
+          mkdir certs
+          cd certs
+
+          # Generate certificate for server with webProxyHost or service name as alternate names to access nifi web ui
+          ${NIFI_TOOLKIT_HOME}/bin/tls-toolkit.sh client \
+            -c "{{ template "ca.server" . }}" \
+            -t {{ .Values.ca.token }} \
+{{- if .Values.properties.webProxyHost }}
+            --subjectAlternativeNames {{ .Values.properties.webProxyHost }}, $(hostname -f) \
+{{- else }}
+            --subjectAlternativeNames {{ template "apache-nifi.fullname" . }}.{{ .Release.Namespace }}.svc \
+{{- end }}
+            -D "CN=$(hostname -f), OU=NIFI" \
+            -p {{ .Values.ca.service.port }}
+
+          # Generate client certificate for browser with webProxyHost or service name as alternate names to access nifi web ui
+          mkdir -p /data/config-data/certs/admin
+          cd /data/config-data/certs/admin
+
+          ${NIFI_TOOLKIT_HOME}/bin/tls-toolkit.sh client \
+            -c "{{ template "ca.server" . }}" \
+            -t {{ .Values.ca.token }} \
+{{- if .Values.properties.webProxyHost }}
+            --subjectAlternativeNames {{ .Values.properties.webProxyHost }} \
+{{- else }}
+            --subjectAlternativeNames {{ template "apache-nifi.fullname" . }}.{{ .Release.Namespace }}.svc \
+{{- end }}
+            -p {{ .Values.ca.service.port }} \
+            -D "CN={{ .Values.ca.admin.cn }}, OU=NIFI" \
+            -T PKCS12
+
+          export PASS=$(jq -r .keyStorePassword config.json)
+
+          openssl pkcs12 -in "keystore.pkcs12" -out "key.pem" -nocerts -nodes -password "env:PASS"
+          openssl pkcs12 -in "keystore.pkcs12" -out "crt.pem" -clcerts -nokeys -password "env:PASS"
+          openssl pkcs12 -in "keystore.pkcs12" -out "keystore.jks" -clcerts -nokeys -password "env:PASS"
+        volumeMounts:
+          - name: "config-data"
+            mountPath: /data/config-data
+{{- end }}
 {{- range $key, $value := .Values.initContainers }}
       - name: {{ $key }}
 {{ toYaml $value | indent 8 }}
@@ -138,6 +194,16 @@ spec:
 
           cat "${NIFI_HOME}/conf/nifi.temp" > "${NIFI_HOME}/conf/nifi.properties"
 
+          if [[ $(grep $(hostname) conf/authorizers.temp) ]]; then
+            cat "${NIFI_HOME}/conf/authorizers.temp" > "${NIFI_HOME}/conf/authorizers.xml"
+          else
+            cat "${NIFI_HOME}/conf/authorizers.empty" > "${NIFI_HOME}/conf/authorizers.xml"
+          fi
+
+          if ! test -f /opt/nifi/data/flow.xml.gz && test -f /opt/nifi/data/flow.xml; then
+            gzip /opt/nifi/data/flow.xml
+          fi
+{{- if .Values.properties.clusterSecure }}
 {{- if .Values.auth.ldap.enabled }}
           cat "${NIFI_HOME}/conf/authorizers.temp" > "${NIFI_HOME}/conf/authorizers.xml"
           cat "${NIFI_HOME}/conf/login-identity-providers-ldap.xml" > "${NIFI_HOME}/conf/login-identity-providers.xml"
@@ -183,6 +249,7 @@ spec:
 {{- else if .Values.auth.singleUser.username }}
           bin/nifi.sh set-single-user-credentials {{ .Values.auth.singleUser.username }} {{ .Values.auth.singleUser.password }}
 {{- end }}
+{{- end }}
 
 {{ if .Values.customFlow }}
           gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.xml.gz
@@ -196,7 +263,11 @@ spec:
           prop_replace nifi.remote.input.host ${FQDN}
           prop_replace nifi.cluster.node.address ${FQDN}
           prop_replace nifi.zookeeper.connect.string ${NIFI_ZOOKEEPER_CONNECT_STRING}
+{{ if .Values.properties.clusterSecure }}
+          prop_replace nifi.web.https.host ${FQDN}
+{{ else }}
           prop_replace nifi.web.http.host ${FQDN}
+{{ end }}
 
 {{- if .Values.properties.webProxyHost }}
           # Update nifi.properties for web ui proxy hostname
@@ -300,7 +371,11 @@ spec:
           function offloadNode() {
               FQDN=$(hostname -f)
               echo "disconnecting node '$FQDN'"
+              {{- if .Values.properties.clusterSecure }}
               baseUrl=https://${FQDN}:{{ .Values.properties.httpsPort }}
+              {{- else }}
+              baseUrl=https://${FQDN}:{{ .Values.properties.httpPort }}
+              {{- end }}
 
               echo "keystoreType=$(prop nifi.security.keystoreType)" > secure.properties
               echo "keystore=$(prop nifi.security.keystore)" >> secure.properties
@@ -321,7 +396,11 @@ spec:
               echo ""
               echo "get a connected node"
               connectedNode=$(jq -r 'first(.cluster.nodes|=sort_by(.address)| .cluster.nodes[] | select(.status=="CONNECTED")) | .address' nodes.json)
+              {{- if .Values.properties.clusterSecure }}
               baseUrl=https://${connectedNode}:{{ .Values.properties.httpsPort }}
+              {{- else }}
+              baseUrl=http://${connectedNode}:{{ .Values.properties.httpPort }}
+              {{- end }}
               echo baseUrl ${baseUrl}
               echo ""
               echo "wait until node has state 'DISCONNECTED'"
@@ -369,6 +448,10 @@ spec:
           exec bin/nifi.sh run & nifi_pid="$!"
           echo NiFi running with PID ${nifi_pid}.
           wait ${nifi_pid}
+          {{ if .Values.auth.ldap }}
+          /opt/nifi/nifi-toolkit-current/bin/tls-toolkit.sh standalone -n '{{.Release.Name}}-nifi-0.{{.Release.Name}}-nifi-headless.{{.Release.Namespace}}.svc.cluster.local' -C '{{.Values.auth.ldap.admin}}' -o '/opt/nifi/nifi-current/conf/' -P {{.Values.auth.SSL.truststorePasswd}}  -S {{.Values.auth.SSL.keystorePasswd}}  --nifiPropertiesFile /opt/nifi/nifi-current/conf/nifi.properties
+          exec bin/nifi.sh run
+          {{ end }}
 
         resources:
 {{ toYaml .Values.resources | indent 10 }}
@@ -378,12 +461,18 @@ spec:
           name: metrics
           protocol: TCP                  
 {{- end }}
+{{- if and .Values.properties.clusterSecure }}
         - containerPort: {{ .Values.properties.httpsPort }}
 {{- if .Values.sts.hostPort }}
           hostPort: {{ .Values.sts.hostPort }}
 {{- end }}
           name: https
           protocol: TCP
+{{- else }}
+        - containerPort: {{ .Values.properties.httpPort }}
+          name: http
+          protocol: TCP
+{{- end }}
         - containerPort: {{ .Values.properties.clusterPort }}
           name: cluster
           protocol: TCP
@@ -417,35 +506,22 @@ spec:
 {{- end }}
           periodSeconds: 20
           tcpSocket:
+{{- if .Values.properties.clusterSecure }}
             port: {{ .Values.properties.httpsPort }}
-#           exec:
-#             command:
-#             - bash
-#             - -c
-#             - |
-# {{- if .Values.properties.httpsPort }}
-#               curl -kv \
-#                 --cert ${NIFI_HOME}/config-data/certs/admin/crt.pem --cert-type PEM \
-#                 --key ${NIFI_HOME}/config-data/certs/admin/key.pem --key-type PEM \
-#                 https://$(hostname -f):{{ .Values.properties.httpsPort }}/nifi-api/controller/cluster > $NIFI_BASE_DIR/data/cluster.state
-# {{- else }}
-#               curl -kv \
-#                 http://$(hostname -f):{{ .Values.properties.httpPort }}/nifi-api/controller/cluster > $NIFI_BASE_DIR/data/cluster.state
-# {{- end }}
-#               STATUS=$(jq -r ".cluster.nodes[] | select((.address==\"$(hostname -f)\") or .address==\"localhost\") | .status" $NIFI_BASE_DIR/data/cluster.state)
-
-#               if [[ ! $STATUS = "CONNECTED" ]]; then
-#                 echo "Node not found with CONNECTED state. Full cluster state:"
-#                 jq . $NIFI_BASE_DIR/data/cluster.state
-#                 exit 1
-#               fi
+{{- else }}
+            port: {{ .Values.properties.httpPort }}
+{{- end }}
 {{- end }}
 {{- if .Values.sts.startupProbe.enabled }}
         startupProbe:
           failureThreshold: {{ .Values.sts.startupProbe.failureThreshold }}
           periodSeconds: {{ .Values.sts.startupProbe.periodSeconds }}
           tcpSocket:
+{{- if .Values.properties.clusterSecure }}
             port: {{ .Values.properties.httpsPort }}
+{{- else }}
+            port: {{ .Values.properties.httpPort }}
+{{- end }}
 {{- end }}
         livenessProbe:
 {{- if not .Values.sts.startupProbe.enabled }}
@@ -453,7 +529,11 @@ spec:
 {{- end }}
           periodSeconds: 60
           tcpSocket:
+{{- if .Values.properties.clusterSecure }}
             port: {{ .Values.properties.httpsPort }}
+{{- else }}
+            port: {{ .Values.properties.httpPort }}
+{{- end }}
         volumeMounts:
           {{- range $initContainer := .Values.initContainers }}
             {{- with $initContainer.volumeMounts }}
@@ -520,12 +600,18 @@ spec:
           - name: "authorizers-temp"
             mountPath: /opt/nifi/nifi-current/conf/authorizers.temp
             subPath: "authorizers.temp"
+          - name: "authorizers-empty"
+            mountPath: /opt/nifi/nifi-current/conf/authorizers.empty
+            subPath: "authorizers.empty"
           - name: "bootstrap-notification-services-xml"
             mountPath: /opt/nifi/nifi-current/conf/bootstrap-notification-services.xml
             subPath: "bootstrap-notification-services.xml"
           - name: "login-identity-providers-ldap-xml"
             mountPath: /opt/nifi/nifi-current/conf/login-identity-providers-ldap.xml
             subPath: "login-identity-providers-ldap.xml"
+          - name: "login-identity-providers-xml"
+            mountPath: /opt/nifi/nifi-current/conf/login-identity-providers.xml
+            subPath: "login-identity-providers.xml"
           - name: "state-management-xml"
             mountPath: /opt/nifi/nifi-current/conf/state-management.xml
             subPath: "state-management.xml"
@@ -783,6 +869,12 @@ spec:
           items:
             - key: "authorizers.xml"
               path: "authorizers.temp"
+      - name: "authorizers-empty"
+        configMap:
+          name: {{ template "apache-nifi.fullname" . }}-config
+          items:
+            - key: "authorizers-empty.xml"
+              path: "authorizers.empty"
       - name: "bootstrap-notification-services-xml"
         configMap:
           name: {{ template "apache-nifi.fullname" . }}-config
@@ -795,6 +887,12 @@ spec:
           items:
             - key: "login-identity-providers-ldap.xml"
               path: "login-identity-providers-ldap.xml"
+      - name: "login-identity-providers-xml"
+        configMap:
+          name: {{ template "apache-nifi.fullname" . }}-config
+          items:
+            - key: "login-identity-providers.xml"
+              path: "login-identity-providers.xml"
       - name: "state-management-xml"
         configMap:
           name: {{ template "apache-nifi.fullname" . }}-config

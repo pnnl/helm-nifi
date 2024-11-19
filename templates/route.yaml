@@ -22,6 +22,7 @@ spec:
     name: {{ $fullName }}
     weight: 100
   port:
+{{- if .Values.properties.clusterSecure }}
     targetPort: https
   tls:
     {{- if .Values.properties.externalSecure }}
@@ -30,4 +31,7 @@ spec:
     termination: passthrough
     {{- end }}
     insecureEdgeTerminationPolicy: Redirect
+{{- else }}
+    targetPort: http
+{{- end }}
 {{- end }}
