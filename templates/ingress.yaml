@@ -41,8 +41,11 @@ spec:
           - path: {{ $ingressPath }}
             pathType: Prefix
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ $ingressHttpsPort }}
+              service:
+                name: {{ $fullName }}
+                port: 
+                  number: {{ $ingressHttpsPort }}
+
   {{- end }}
 {{- else}}
   {{- range .Values.ingress.hosts }}
@@ -52,8 +55,10 @@ spec:
           - path: {{ $ingressPath }}
             pathType: Prefix
             backend:
-              serviceName: {{ $fullName }}
-              servicePort: {{ $ingressHttpPort }}
+              service:
+                name: {{ $fullName }}
+                port: 
+                  number: {{ $ingressHttpPort }}
   {{- end }}
 {{- end }}
 {{- end }}

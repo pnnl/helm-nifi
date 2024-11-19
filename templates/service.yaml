@@ -76,6 +76,12 @@ spec:
   {{- if .Values.properties.siteToSite.nodePort }}
       nodePort: {{ .Values.properties.siteToSite.nodePort }}
   {{- end }}
+{{- else }}
+    - port: {{ .Values.service.httpPort }}
+      name: http
+      targetPort: {{ .Values.properties.httpPort }}
+      nodePort: {{ .Values.service.nodePort }}
+{{- end }}
 {{- if .Values.service.processors.enabled }}
 {{- with .Values.service.processors.ports  }}
 {{- range . }}
@@ -85,12 +91,6 @@ spec:
       {{- if eq $.Values.service.type "NodePort" }}
       nodePort: {{ .nodePort }}
       {{- end }}
-{{- else }}
-    - port: {{ .Values.service.httpPort }}
-      name: http
-      targetPort: {{ .Values.properties.httpPort }}
-      nodePort: {{ .Values.service.nodePort }}
-{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

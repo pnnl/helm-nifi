@@ -18,9 +18,14 @@ done
 # Install NiFi expecting secrets:
 
 helm -n alpha install nifi . \
+  --set service.type=ClusterIP \
+  --set service.httpsPort=8443 \
+  --set service.processors.enabled=false \
   --set zookeeper.enabled=false \
   --set properties.isNode=false \
   --set properties.webProxyHost=nifi.alpha.svc.cluster.local:8443 \
+  --set properties.clusterSecure=true \
+  --set properties.httpsPort=8443 \
   --set replicaCount=1 \
   --set registry.enabled=false \
   --set certManager.enabled=true \
@@ -32,9 +37,14 @@ helm -n alpha install nifi . \
   --set 'certManager.caSecrets[0]=bravo-ca'
 
 helm -n bravo install nifi . \
+  --set service.type=ClusterIP \
+  --set service.httpsPort=8443 \
+  --set service.processors.enabled=false \
   --set zookeeper.enabled=false \
   --set properties.isNode=false \
   --set properties.webProxyHost=nifi.bravo.svc.cluster.local:8443 \
+  --set properties.clusterSecure=true \
+  --set properties.httpsPort=8443 \
   --set replicaCount=1 \
   --set registry.enabled=false \
   --set certManager.enabled=true \

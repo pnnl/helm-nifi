@@ -2,9 +2,8 @@ service:
   type: "ClusterIP"
   httpsPort: "8443"
   processors:
-    enabled: true
-    ports: []
-    
+    enabled: false
+
 zookeeper:
   enabled: true
 
