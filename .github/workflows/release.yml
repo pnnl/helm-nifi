@@ -2,6 +2,7 @@ name: Release Helm Chart
 
 on:
   push:
+      - 'v*'
 
 jobs:
   release:
