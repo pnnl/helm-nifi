@@ -29,7 +29,6 @@ jobs:
       - name: Install dependencies
         working-directory: charts/nifi
         run: |
-          cd charts/nifi
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add dysnix https://dysnix.github.io/charts/
           helm repo update
