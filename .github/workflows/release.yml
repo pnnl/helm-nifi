@@ -1,0 +1,39 @@
+name: Release Helm Chart
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+
+      - name: Extract chart version from tag
+        id: version
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Package Helm chart
+        run: |
+          helm package charts/nifi --version ${{ steps.version.outputs.VERSION }}
+          mkdir -p repo
+          mv nifi-${{ steps.version.outputs.VERSION }}.tgz repo/
+
+      - name: Generate Helm repo index
+        run: |
+          helm repo index repo --url https://pnnl.github.io/helm-nifi
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          publish_branch: gh-pages

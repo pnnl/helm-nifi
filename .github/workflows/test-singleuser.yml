@@ -7,7 +7,7 @@ on:
 jobs:
   test-singleuser:
     name: Test NiFi Helm Chart Single User
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
+        working-directory: charts/nifi
         run: |
           sudo apt-get install -y jq
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -27,10 +28,12 @@ jobs:
           helm repo update
           helm dep up
       - name: Install openldap
+        working-directory: charts/nifi
         run: |
           kubectl apply -f tests/03-ldap
           kubectl rollout status --watch deployment/openldap --timeout=5m
       - name: Install Nifi
+        working-directory: charts/nifi
         run: helm install nifi .
       - name: Check deployment status
         run: |

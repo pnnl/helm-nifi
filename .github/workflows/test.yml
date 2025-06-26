@@ -11,7 +11,7 @@ on:
 jobs:
   example:
     name: Minikube installation - Basic test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -27,12 +27,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
+        working-directory: charts/nifi
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add dysnix https://dysnix.github.io/charts/
           helm repo update
           helm dep up
       - name: Install Nifi
+        working-directory: charts/nifi
         run: helm install nifi .
       - name: Check deployment status
         run: |

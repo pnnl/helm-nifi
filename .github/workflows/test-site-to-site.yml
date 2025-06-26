@@ -7,7 +7,7 @@ on:
 jobs:
   test-oidc:
     name: Test NiFi Helm Chart Secure Site-to-Site
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
+        working-directory: charts/nifi
         run: |
           sudo apt-get install -y jq
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -27,8 +28,10 @@ jobs:
           helm repo update
           helm dep up
       - name: Install cert-manager
+        working-directory: charts/nifi
         run: tests/05-install-cert-manager.bash
       - name: Install ALPHA and BRAVO instances of NiFi
+        working-directory: charts/nifi
         run: tests/06-site-to-site.bash
       - name: Check deployment status
         run: |
