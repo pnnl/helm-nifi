@@ -2,6 +2,8 @@ name: Release Helm Chart
 
 on:
   push:
+    tags:
+      - 'v*'
 
 jobs:
   release:
@@ -22,9 +24,9 @@ jobs:
       - name: Package Helm chart
         run: |
           helm dependency update charts/nifi
-          helm package charts/nifi --version 1.0.0
+          helm package charts/nifi --version ${{ steps.version.outputs.VERSION }}
           mkdir -p repo
-          mv nifi-1.0.0.tgz repo/
+          mv nifi-${{ steps.version.outputs.VERSION }}.tgz repo/
 
       - name: Generate Helm repo index
         run: |
