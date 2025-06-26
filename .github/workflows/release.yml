@@ -21,16 +21,9 @@ jobs:
         run: |
           echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       
-      - name: Install dependencies
-        working-directory: charts/nifi
-        run: |
-          helm repo add bitnami https://charts.bitnami.com/bitnami
-          helm repo add dysnix https://dysnix.github.io/charts/
-          helm repo update
-          helm dep up 
-
       - name: Package Helm chart
         run: |
+          helm dependency update charts/nifi
           helm package charts/nifi --version ${{ steps.version.outputs.VERSION }}
           mkdir -p repo
           mv nifi-${{ steps.version.outputs.VERSION }}.tgz repo/
