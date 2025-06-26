@@ -1,9 +1,7 @@
 name: Release Helm Chart
 
-# on:
-#   push:
-#     tags:
-#       - 'v*'
+on:
+  push:
 
 jobs:
   release:
