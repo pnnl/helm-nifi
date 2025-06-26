@@ -22,7 +22,7 @@ jobs:
       - name: Package Helm chart
         run: |
           helm dependency update charts/nifi
-          helm package charts/nifi --version ${{ steps.version.outputs.VERSION }}
+          helm package charts/nifi --version 1.0.0
           mkdir -p repo
           mv nifi-${{ steps.version.outputs.VERSION }}.tgz repo/
 
