@@ -23,6 +23,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get install -y jq
+          cd charts/nifi
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add dysnix https://dysnix.github.io/charts/
           helm repo update
