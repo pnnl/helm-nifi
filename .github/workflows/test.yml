@@ -27,6 +27,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
+        working-directory: charts/nifi
         run: |
           cd charts/nifi
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -34,6 +35,7 @@ jobs:
           helm repo update
           helm dep up
       - name: Install Nifi
+        working-directory: charts/nifi
         run: helm install nifi .
       - name: Check deployment status
         run: |

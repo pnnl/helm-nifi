@@ -20,14 +20,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
+        working-directory: charts/nifi
         run: |
           sudo apt-get install -y jq
-          cd charts/nifi
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add dysnix https://dysnix.github.io/charts/
           helm repo update
           helm dep up
       - name: Install Nifi
+        working-directory: charts/nifi
         run: helm install nifi . -f tests/02-persistence-enabled-values.yaml
       - name: Check deployment status
         run: |
@@ -52,6 +53,7 @@ jobs:
           helm delete nifi
           kubectl wait --for=delete pod/nifi-0 --timeout=120s
       - name: Install NiFi
+        working-directory: charts/nifi
         run: helm install nifi . -f tests/02-persistence-enabled-values.yaml
       - name: Check deployment status
         run: |
@@ -91,6 +93,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
+        working-directory: charts/nifi
         run: |
           sudo apt-get install -y jq
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -98,6 +101,7 @@ jobs:
           helm repo update
           helm dep up
       - name: Install Nifi
+        working-directory: charts/nifi
         run: helm install nifi . -f tests/02-persistence-disabled-values.yaml
       - name: Check deployment status
         run: |
@@ -122,6 +126,7 @@ jobs:
           helm delete nifi
           kubectl wait --for=delete pod/nifi-0 --timeout=120s
       - name: Install NiFi
+        working-directory: charts/nifi
         run: helm install nifi . -f tests/02-persistence-disabled-values.yaml
       - name: Check deployment status
         run: |
