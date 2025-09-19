@@ -395,6 +395,10 @@ ca:
 # as well as the certificates for each cluster node.
 certManager:
   enabled: false
+  image:
+    repository: apache/nifi
+    tag: "1.23.2"
+    pullPolicy: "IfNotPresent"
   clusterDomain: cluster.local
   keystorePasswd: changeme
   truststorePasswd: changeme
