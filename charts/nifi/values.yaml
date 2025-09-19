@@ -10,11 +10,11 @@ image:
   tag: "1.23.2"
   pullPolicy: "IfNotPresent"
 
-  ## Optionally specify an imagePullSecret.
-  ## Secret must be manually created in the namespace.
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-  ##
-  # pullSecret: myRegistrKeySecretName
+
+## Optionally specify a list of imagePullSecrets.
+## Secret must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+# imagePullSecrets: [myRegistrKeySecretName, myOtherRegistrKeySecretName]
 
 securityContext:
   runAsUser: 1000
