@@ -105,9 +105,9 @@ spec:
       - name: {{ $key }}
 {{ toYaml $value | indent 8 }}
 {{- end }}
-      {{- if .Values.image.pullSecrets }}
+      {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
-      {{- range .Values.image.pullSecrets }}
+      {{- range .Values.imagePullSecrets }}
       - name: {{ . }}
       {{- end }}
       {{- end }}
