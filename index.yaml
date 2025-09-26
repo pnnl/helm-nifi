@@ -3,7 +3,7 @@ entries:
   nifi:
   - apiVersion: v2
     appVersion: 1.23.2
-    created: "2025-09-19T19:01:29.354660171Z"
+    created: "2025-09-26T15:09:31.381406961Z"
     dependencies:
     - condition: zookeeper.enabled
       name: zookeeper
@@ -24,7 +24,7 @@ entries:
       version: ~1.2.4
     description: Apache NiFi is a software project from the Apache Software Foundation
       designed to automate the flow of data between software systems.
-    digest: 96ce5e8b18a421ed2f4d534bba82167f7fc6fb44bd5fb38b37e7125a0aa30476
+    digest: 9e067e256fe83b09f7b1b0596fb26077f7ddc8463ae986651211418b079b5dd9
     home: https://nifi.apache.org/
     icon: https://svn.apache.org/repos/asf/nifi/site/trunk/images/niFi-logo-horizontal-scaled.png
     keywords:
@@ -39,4 +39,4 @@ entries:
     urls:
     - https://pnnl.github.io/helm-nifi/nifi-1.3.0.tgz
     version: 1.3.0
-generated: "2025-09-19T19:01:29.347262568Z"
+generated: "2025-09-26T15:09:31.372992629Z"
