@@ -435,6 +435,11 @@ zookeeper:
   url: ""
   port: 2181
   replicaCount: 3
+  
+  image: 
+    registry: "docker.io"
+    repository: "bitnamilegacy/zookeeper"
+    tag: "3.8.2-debian-11-r37"
 
 # ------------------------------------------------------------------------------
 # Nifi registry:
