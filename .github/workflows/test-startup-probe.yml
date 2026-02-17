@@ -6,9 +6,9 @@ on:
 
 jobs:
 
-  test-startup-probee:
+  test-startup-probe:
     name: Test NiFi Helm Chart Startup Probe
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
