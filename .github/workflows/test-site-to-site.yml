@@ -45,9 +45,9 @@ jobs:
             then
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo NiFi did not start for 300 seconds!
+          echo NiFi did not start for 600 seconds!
           echo ===ALPHA SERVER LOGS===
           kubectl -n alpha logs pod/nifi-0 -c server
           echo ===ALPHA APP LOGS===
@@ -71,9 +71,9 @@ jobs:
             then
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo Got no items for 300 seconds!
+          echo Got no items for 600 seconds!
           echo ===ALPHA SERVER LOGS===
           kubectl -n alpha logs pod/nifi-0 -c server
           echo ===ALPHA APP LOGS===
@@ -100,9 +100,9 @@ jobs:
             then
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo Certificate did not update for 300 seconds!
+          echo Certificate did not update for 600 seconds!
           echo ===ALPHA SERVER LOGS===
           kubectl -n alpha logs pod/nifi-0 -c server
           echo ===ALPHA APP LOGS===

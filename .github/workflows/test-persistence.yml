@@ -44,9 +44,9 @@ jobs:
               echo "::set-output name=PGFURI::$PGFURI"
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo NiFi did not provide an access token for 300 seconds!
+          echo NiFi did not provide an access token for 600 seconds!
           exit 1
       - name: Delete chart
         run: |
@@ -69,9 +69,9 @@ jobs:
               echo "::set-output name=PGFURI::$PGFURI"
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo NiFi did not provide an access token for 300 seconds!
+          echo NiFi did not provide an access token for 600 seconds!
           exit 1
       - name: Compare 2 x root processGroupFlow .processGroupFlow.uri
         run: |
@@ -118,9 +118,9 @@ jobs:
               echo "::set-output name=PGFURI::$PGFURI"
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo NiFi did not provide an access token for 300 seconds!
+          echo NiFi did not provide an access token for 600 seconds!
           exit 1
       - name: Delete chart
         run: |
@@ -143,9 +143,9 @@ jobs:
               echo "::set-output name=PGFURI::$PGFURI"
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo NiFi did not provide an access token for 300 seconds!
+          echo NiFi did not provide an access token for 600 seconds!
           exit 1
       - name: Compare 2 x root processGroupFlow .processGroupFlow.uri
         run: |

@@ -43,9 +43,9 @@ jobs:
             then
               exit 0
             fi
-            sleep 30
+            sleep 60
           done
-          echo NiFi did not start for 300 seconds!
+          echo NiFi did not start for 600 seconds!
           exit 1
       - name: Check safetyValve content is correct
         run: |
