@@ -439,7 +439,6 @@ zookeeper:
   url: ""
   port: 2181
   replicaCount: 3
-  
   image: 
     registry: "docker.io"
     repository: "bitnamilegacy/zookeeper"
