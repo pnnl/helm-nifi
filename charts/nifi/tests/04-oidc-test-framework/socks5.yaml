@@ -37,6 +37,9 @@ spec:
           ports:
             - name: tcp-socks5
               containerPort: 1080
+          env: 
+            - name: REQUIRE_AUTH
+              value: "false"
  #       - name: netshoot
  #         command: [ 'tail', '-f', '/dev/null' ]
  #         image: docker.io/nicolaka/netshoot:latest

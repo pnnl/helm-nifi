@@ -1,7 +1,5 @@
 # Helm Chart for Apache NiFi
 
-[![CircleCI](https://circleci.com/gh/cetic/helm-nifi.svg?style=svg)](https://circleci.com/gh/cetic/helm-nifi/tree/master) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![version](https://img.shields.io/github/tag/cetic/helm-nifi.svg?label=release) ![test](https://github.com/cetic/helm-nifi/actions/workflows/test.yml/badge.svg)
-
 ## Introduction
 
 This [Helm](https://helm.sh/) chart installs [Apache NiFi](https://nifi.apache.org/) 1.23.2 in a [Kubernetes](https://kubernetes.io/) cluster.
@@ -17,7 +15,7 @@ This [Helm](https://helm.sh/) chart installs [Apache NiFi](https://nifi.apache.o
 ### Add Helm repository
 
 ```bash
-helm repo add cetic https://cetic.github.io/helm-charts
+helm repo add pnnl https://pnnl.github.io/helm-nifi
 helm repo update
 ```
 
@@ -70,7 +68,7 @@ If you plan to use Grafana for the visualization of the metrics data [the follow
 Install the nifi helm chart with a release name `my-release`:
 
 ```bash
-helm install my-release cetic/nifi
+helm install my-release pnnl/nifi
 ```
 
 ### Install from local clone

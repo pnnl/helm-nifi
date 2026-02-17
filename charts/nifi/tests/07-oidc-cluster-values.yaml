@@ -1,5 +1,9 @@
 zookeeper:
   enabled: true
+  image: 
+    registry: "docker.io"
+    repository: "bitnamilegacy/zookeeper"
+    tag: "3.8.2-debian-11-r37"
 
 registry:
   enabled: false
