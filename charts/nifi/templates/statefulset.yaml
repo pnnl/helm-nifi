@@ -631,7 +631,11 @@ spec:
 {{- if .Values.certManager.enabled }}
       - name: cert-manager
         imagePullPolicy: {{ .Values.certManager.image.pullPolicy | quote }}
-        image: "{{ .Values.certManager.image.repository }}:{{ .Values.certManager.image.tag }}"
+        {{- if and .Values.certManager.image.repository .Values.certManager.image.tag }}
+        image: {{ .Values.certManager.image.repository }}:{{ .Values.certManager.image.tag }}
+        {{- else }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        {{- end }}
         command:
         - bash
         - -ce

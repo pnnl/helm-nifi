@@ -7,7 +7,7 @@ replicaCount: 1
 ##
 image:
   repository: apache/nifi
-  tag: "1.23.2"
+  tag: "2.0.0"
   pullPolicy: "IfNotPresent"
 
 
@@ -104,6 +104,8 @@ properties:
   archiveMaxUsagePercentage: "85%"
   provenanceStorage: "8 GB"
   provenanceMaxStorageTime: "10 days"
+  # flowConfigurationFormat: This is needed because json was added in 1.16, with xml deprecated in 2.0.0. For full backwards and current compatablility, users must specify the format of this file. (default json)
+  flowConfigurationFormat: "json" # must be one of ["xml", "json"]. 
   flowArchiveMaxTime: "30 days"
   flowArchiveMaxStorage: "500 MB"
   siteToSite:
@@ -395,9 +397,11 @@ ca:
 # as well as the certificates for each cluster node.
 certManager:
   enabled: false
+  # image: Image used in the cert-manager sidecar. By default this is the nifi image you are deploying as it has the following tools installed: [jq, curl, openssl, keytool]
+  # However, when using security hardened images or custom images of nifi that do not include these tools, you may use this to specify an image that has [jq, curl, openssl, keytool] installed.
   image:
-    repository: apache/nifi
-    tag: "1.23.2"
+    repository:
+    tag:
     pullPolicy: "IfNotPresent"
   clusterDomain: cluster.local
   keystorePasswd: changeme
