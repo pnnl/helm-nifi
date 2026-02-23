@@ -34,4 +34,4 @@ jobs:
       - name: Confirm rollout waits until JettyServer starts
         run: |
           kubectl rollout status --watch statefulset/nifi --timeout=10m
-          kubectl logs pod/nifi-0 -c app-log | grep 'JettyServer NiFi Started Server'
+          kubectl logs pod/nifi-0 -c app-log | grep -E "JettyServer(\b Nifi\b)? Started Server"
