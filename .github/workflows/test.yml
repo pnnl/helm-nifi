@@ -53,13 +53,5 @@ jobs:
           exit 1
       - name: Check that web application responds with expected content
         run: |
-          for n in [ 0 1 2 3 4 5 6 7 8 9 ]
-          do
-            if kubectl exec pod/nifi-0 -c server -- curl -sk https://localhost:8443 | grep 'You may have mistyped'
-            then
-              exit 0
-            fi
-            sleep 30
-          done
-          echo NiFi did not response correctly for 300 seconds!
-          exit 1
+          kubectl exec pod/nifi-0 -c server -- curl -sk https://localhost:8443 | \
+            grep '<title>NiFi</title>'

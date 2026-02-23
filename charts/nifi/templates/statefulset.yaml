@@ -256,7 +256,7 @@ spec:
 {{- /* if .Values.certManager.enabled */}}{{- else }}
 {{- $appVersion := .Chart.AppVersion -}}
 {{- $requiredVersion := "2.0.0" -}}
-{{- if gt $appVersion $requiredVersion }}
+{{- if lt $appVersion $requiredVersion }}
           echo "NIFI TLS-TOOLKIT DEPRECATED -- FULLY REMOVED IN 2.x.x"
           if [ ! -r "${NIFI_HOME}/conf/nifi-cert.pem" ]
           then

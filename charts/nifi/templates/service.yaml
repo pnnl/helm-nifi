@@ -87,6 +87,9 @@ spec:
     release: {{ .Release.Name }}
 {{- if .Values.metrics.prometheus.enabled }}
 ---
+{{- $appVersion := .Chart.AppVersion -}}
+{{- $requiredVersion := "2.0.0" -}}
+{{- if lt $appVersion $requiredVersion }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -107,3 +110,4 @@ spec:
     release: {{ .Release.Name }}
   type: ClusterIP
   {{- end }}    
+{{- end }}
