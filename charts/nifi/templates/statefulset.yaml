@@ -177,7 +177,7 @@ spec:
                                     --insert "authorizers/userGroupProvider/property[not(@name)]" --type attr -n name \
                                     --value "Initial User Identity {{ . }}" \
                                     "${NIFI_HOME}/conf/authorizers.xml"
-            {{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{ end }}
+            {{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{- end }}
           {{- end }}
 {{- else if .Values.auth.clientAuth.enabled }}
           cat "${NIFI_HOME}/conf/authorizers.temp" > "${NIFI_HOME}/conf/authorizers.xml"
@@ -188,11 +188,11 @@ spec:
 
 {{ if .Values.customFlow }}
           gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.xml.gz
-{{ else }}
+{{- else }}
           if ! test -f /opt/nifi/data/flow.xml.gz && test -f /opt/nifi/data/flow.xml; then
             gzip /opt/nifi/data/flow.xml
           fi
-{{ end }}
+{{- end }}
 
           prop_replace nifi.ui.banner.text $(hostname -s)
           prop_replace nifi.remote.input.host ${FQDN}
@@ -222,7 +222,7 @@ spec:
                         --insert "authorizers/userGroupProvider/property[not(@name)]" --type attr -n name \
                           --value "Initial User Identity {{ . }}" \
                         "${NIFI_HOME}/conf/authorizers.xml"
-{{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{ end }}
+{{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{- end }}
 
           prop_replace nifi.security.keystore "${NIFI_HOME}/tls/keystore.jks"
           prop_replace nifi.security.keystoreType JKS
@@ -253,8 +253,11 @@ spec:
             sleep 2
           done
 
-{{- /* if .Values.certManager.enabled */}}{{ else }}
-
+{{- /* if .Values.certManager.enabled */}}{{- else }}
+{{- $appVersion := .Chart.AppVersion -}}
+{{- $requiredVersion := "2.0.0" -}}
+{{- if gt $appVersion $requiredVersion }}
+          echo "NIFI TLS-TOOLKIT DEPRECATED -- FULLY REMOVED IN 2.x.x"
           if [ ! -r "${NIFI_HOME}/conf/nifi-cert.pem" ]
           then
             /opt/nifi/nifi-toolkit-current/bin/tls-toolkit.sh standalone \
@@ -265,8 +268,8 @@ spec:
               -S {{.Values.auth.SSL.keystorePasswd}} \
               --nifiPropertiesFile /opt/nifi/nifi-current/conf/nifi.properties
           fi
-
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if if gt $appVersion $requiredVersion */ -}}{{- end }}
+{{- /* if .Values.certManager.enabled */ -}}{{- end }}
 
 {{- if .Values.properties.safetyValve }}
   {{- range $prop, $val := .Values.properties.safetyValve }}
@@ -279,13 +282,13 @@ spec:
           then
 {{- if .Values.properties.sensitiveKeyPrior }}
             prop_replace nifi.sensitive.props.key {{ .Values.properties.sensitiveKeyPrior | quote }}
-{{- /* if .Values.properties.sensitiveKeyPrior */}}{{ else }}
+{{- /* if .Values.properties.sensitiveKeyPrior */}}{{- else }}
             prop_replace nifi.sensitive.props.key ""
-{{- /* if .Values.properties.sensitiveKeyPrior */}}{{ end }}
+{{- /* if .Values.properties.sensitiveKeyPrior */}}{{- end }}
             bin/nifi.sh set-sensitive-properties-key {{ .Values.properties.sensitiveKey | quote }}
             touch {{ .Values.properties.sensitiveKeySetFile | quote }}
           fi
-{{- /* if .Values.properties.sensitiveKeySetFile */}}{{ end }}
+{{- /* if .Values.properties.sensitiveKeySetFile */}}{{- end }}
 
           for f in "${NIFI_HOME}/conf/authorizers.xml" "${NIFI_HOME}/conf/login-identity-providers.xml" ${NIFI_HOME}/conf/nifi.properties
           do
@@ -573,7 +576,7 @@ spec:
           - name: "tls"
             mountPath: /opt/nifi/nifi-current/tls
             readOnly: true
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if .Values.certManager.enabled */}}{{- end }}
           {{- if .Values.extraVolumeMounts }}
 {{ toYaml .Values.extraVolumeMounts | indent 10 }}
           {{- end }}
@@ -740,7 +743,7 @@ spec:
           - name: {{ include "apache-nifi.fullname" $ }}-{{ $secret }}
             mountPath: /opt/nifi/nifi-current/tls/{{ $secret }}
             readOnly: true
-          {{ end }}
+          {{- end }}
           {{- range $configmap := .Values.configmaps }}
             {{- if $configmap.mountPath }}
               {{- if $configmap.keys }}
@@ -759,10 +762,10 @@ spec:
           {{- end }}
           {{- if .Values.extraVolumeMounts }}
 {{ toYaml .Values.extraVolumeMounts | indent 10 }}
-          {{/* if .Values.extraVolumeMounts */}}{{ end }}
+          {{/* if .Values.extraVolumeMounts */}}{{- end }}
         resources:
 {{ toYaml .Values.certManager.resources | indent 10 }}
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if .Values.certManager.enabled */}}{{- end }}
       volumes:
       {{- range $initContainer := .Values.initContainers }}
         {{- with $initContainer.volumes }}
@@ -830,7 +833,7 @@ spec:
         secret:
           secretName: {{ . }}
       {{- end }}
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if .Values.certManager.enabled */}}{{- end }}
       {{- range .Values.secrets }}
       - name: {{ include "apache-nifi.fullname" $ }}-{{ .name }}
         secret:
