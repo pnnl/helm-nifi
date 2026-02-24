@@ -49,6 +49,7 @@ jobs:
             fi
             sleep 30
           done
+          kubectl get pods
           kubectl logs pod/nifi-0 -c app-log
           echo NiFi did not start for 300 seconds!
           exit 1
