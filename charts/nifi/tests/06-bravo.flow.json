@@ -8,75 +8,25 @@
     "registries": [],
     "parameterContexts": [],
     "parameterProviders": [],
-    "controllerServices": [
-        {
-            "identifier": "7f291dd2-71e7-3e56-8b5f-76d0fade0306",
-            "instanceIdentifier": "c135c2ce-017e-1000-d88a-347b945f505f",
-            "name": "StandardRestrictedSSLContextService",
-            "comments": "",
-            "type": "org.apache.nifi.ssl.StandardRestrictedSSLContextService",
-            "bundle": {
-                "group": "org.apache.nifi",
-                "artifact": "nifi-ssl-context-service-nar",
-                "version": "1.28.1"
-            },
-            "properties": {
-                "Truststore Type": "JKS",
-                "SSL Protocol": "TLS",
-                "Keystore Type": "JKS",
-                "Truststore Filename": "/opt/nifi/nifi-current/tls/truststore.jks",
-                "Keystore Password": "enc{457e7d7b723a381222a3f955bdeeb34addc9c33547eafbfb7320123101fc15f730891ded21875f70}",
-                "Truststore Password": "enc{d95948dd4d710b9d3a51fa9abb386bcd14d267fed444758e240dd54d7459174c7a57c9d5093ee1f8}",
-                "Keystore Filename": "/opt/nifi/nifi-current/tls/keystore.jks"
-            },
-            "propertyDescriptors": {},
-            "controllerServiceApis": [
-                {
-                    "type": "org.apache.nifi.ssl.SSLContextService",
-                    "bundle": {
-                        "group": "org.apache.nifi",
-                        "artifact": "nifi-standard-services-api-nar",
-                        "version": "1.28.1"
-                    }
-                },
-                {
-                    "type": "org.apache.nifi.ssl.RestrictedSSLContextService",
-                    "bundle": {
-                        "group": "org.apache.nifi",
-                        "artifact": "nifi-standard-services-api-nar",
-                        "version": "1.28.1"
-                    }
-                }
-            ],
-            "scheduledState": "ENABLED",
-            "bulletinLevel": "WARN",
-            "componentType": "CONTROLLER_SERVICE"
-        }
-    ],
+    "controllerServices": [],
     "reportingTasks": [
         {
-            "identifier": "c131bf78-017e-1000-dbc1-a9b6b34a798b",
-            "instanceIdentifier": "c131bf78-017e-1000-dbc1-a9b6b34a798b",
-            "name": "SiteToSiteProvenanceReportingTask",
+            "identifier": "c2b0c85e-017e-1000-0f6d-53ed5df3eb43",
+            "instanceIdentifier": "c2b0c85e-017e-1000-0f6d-53ed5df3eb43",
+            "name": "PrometheusReportingTask",
             "comments": "",
-            "type": "org.apache.nifi.reporting.SiteToSiteProvenanceReportingTask",
+            "type": "org.apache.nifi.reporting.prometheus.PrometheusReportingTask",
             "bundle": {
                 "group": "org.apache.nifi",
-                "artifact": "nifi-site-to-site-reporting-nar",
+                "artifact": "nifi-prometheus-nar",
                 "version": "1.28.1"
             },
             "properties": {
-                "Input Port Name": "ProvInput",
-                "s2s-transport-protocol": "RAW",
-                "Platform": "nifi",
-                "Destination URL": "https://nifi.bravo.svc.cluster.local:8443/nifi",
-                "include-null-values": "false",
-                "SSL Context Service": "c135c2ce-017e-1000-d88a-347b945f505f",
-                "Compress Events": "true",
-                "Batch Size": "1000",
-                "Communications Timeout": "30 secs",
-                "start-position": "beginning-of-stream",
-                "Instance URL": "http://${hostname(true)}:8080/nifi"
+                "prometheus-reporting-task-metrics-endpoint-port": "9092",
+                "prometheus-reporting-task-metrics-strategy": "All Components",
+                "prometheus-reporting-task-instance-id": "${hostname(true)}",
+                "prometheus-reporting-task-client-auth": "No Authentication",
+                "prometheus-reporting-task-metrics-send-jvm": "false"
             },
             "propertyDescriptors": {},
             "scheduledState": "RUNNING",
@@ -87,79 +37,39 @@
     ],
     "templates": [],
     "rootGroup": {
-        "identifier": "0577156e-9f00-3875-bd81-c72d73a1fb85",
-        "instanceIdentifier": "85928fc5-336a-4a64-b887-6869cd41eda9",
-        "name": "ALPHA",
+        "identifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+        "instanceIdentifier": "356a3caa-e4c2-492d-9c1d-e040d8a3b5be",
+        "name": "BRAVO",
         "comments": "",
         "position": {
             "x": 0.0,
             "y": 0.0
         },
         "processGroups": [],
-        "remoteProcessGroups": [
-            {
-                "identifier": "a144ea1f-a059-32a3-8b0a-1ef108a34d2a",
-                "instanceIdentifier": "c11f5fe0-017e-1000-2f63-a9a78031e0c0",
-                "name": "BRAVO",
-                "comments": "",
-                "position": {
-                    "x": 248.0,
-                    "y": 208.0
-                },
-                "targetUri": "https://nifi.bravo.svc.cluster.local:8443/nifi",
-                "targetUris": "https://nifi.bravo.svc.cluster.local:8443/nifi",
-                "communicationsTimeout": "30 sec",
-                "yieldDuration": "10 sec",
-                "transportProtocol": "RAW",
-                "proxyHost": "",
-                "proxyUser": "",
-                "inputPorts": [
-                    {
-                        "identifier": "67ea2c8e-9824-3d6b-a03c-cdbfafe7ced9",
-                        "instanceIdentifier": "eccfb75d-417c-38d5-be12-cdffc1189223",
-                        "name": "BravoInput",
-                        "comments": "",
-                        "remoteGroupId": "a144ea1f-a059-32a3-8b0a-1ef108a34d2a",
-                        "concurrentlySchedulableTaskCount": 1,
-                        "useCompression": false,
-                        "batchSize": {},
-                        "componentType": "REMOTE_INPUT_PORT",
-                        "targetId": "c11a3c30-017e-1000-f2f0-17232c042b30",
-                        "scheduledState": "RUNNING",
-                        "groupIdentifier": "a144ea1f-a059-32a3-8b0a-1ef108a34d2a"
-                    }
-                ],
-                "outputPorts": [],
-                "componentType": "REMOTE_PROCESS_GROUP",
-                "groupIdentifier": "0577156e-9f00-3875-bd81-c72d73a1fb85"
-            }
-        ],
+        "remoteProcessGroups": [],
         "processors": [
             {
-                "identifier": "fc18decd-e88f-3237-9ddd-6040b5a1bbd2",
-                "instanceIdentifier": "c1202f8e-017e-1000-a733-50c5cb8784b1",
-                "name": "GenerateFlowFile",
+                "identifier": "966769d6-47f6-333a-a0af-ce21eab66f20",
+                "instanceIdentifier": "c130053e-017e-1000-e581-48dcfc185038",
+                "name": "UpdateAttribute",
                 "comments": "",
                 "position": {
-                    "x": 264.0,
-                    "y": -16.0
+                    "x": 680.0,
+                    "y": 256.0
                 },
-                "type": "org.apache.nifi.processors.standard.GenerateFlowFile",
+                "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
                 "bundle": {
                     "group": "org.apache.nifi",
-                    "artifact": "nifi-standard-nar",
+                    "artifact": "nifi-update-attribute-nar",
                     "version": "1.28.1"
                 },
                 "properties": {
-                    "character-set": "UTF-8",
-                    "File Size": "0B",
-                    "Batch Size": "1",
-                    "Unique FlowFiles": "false",
-                    "Data Format": "Text"
+                    "Store State": "Do not store state",
+                    "canonical-value-lookup-cache-size": "100"
                 },
                 "propertyDescriptors": {},
                 "style": {},
-                "schedulingPeriod": "1 sec",
+                "schedulingPeriod": "0 sec",
                 "schedulingStrategy": "TIMER_DRIVEN",
                 "executionNode": "ALL",
                 "penaltyDuration": "30 sec",
@@ -167,43 +77,118 @@
                 "bulletinLevel": "WARN",
                 "runDurationMillis": 0,
                 "concurrentlySchedulableTaskCount": 1,
-                "autoTerminatedRelationships": [],
+                "autoTerminatedRelationships": [
+                    "success"
+                ],
                 "scheduledState": "RUNNING",
                 "retryCount": 10,
                 "retriedRelationships": [],
                 "backoffMechanism": "PENALIZE_FLOWFILE",
                 "maxBackoffPeriod": "10 mins",
                 "componentType": "PROCESSOR",
-                "groupIdentifier": "0577156e-9f00-3875-bd81-c72d73a1fb85"
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            },
+            {
+                "identifier": "2eba9297-486f-3db8-922c-67f01192001f",
+                "instanceIdentifier": "c11a6e7f-017e-1000-cdd8-2d3e424d7225",
+                "name": "UpdateAttribute",
+                "comments": "",
+                "position": {
+                    "x": 216.0,
+                    "y": 256.0
+                },
+                "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+                "bundle": {
+                    "group": "org.apache.nifi",
+                    "artifact": "nifi-update-attribute-nar",
+                    "version": "1.28.1"
+                },
+                "properties": {
+                    "Store State": "Do not store state",
+                    "canonical-value-lookup-cache-size": "100"
+                },
+                "propertyDescriptors": {},
+                "style": {},
+                "schedulingPeriod": "0 sec",
+                "schedulingStrategy": "TIMER_DRIVEN",
+                "executionNode": "ALL",
+                "penaltyDuration": "30 sec",
+                "yieldDuration": "1 sec",
+                "bulletinLevel": "WARN",
+                "runDurationMillis": 0,
+                "concurrentlySchedulableTaskCount": 1,
+                "autoTerminatedRelationships": [
+                    "success"
+                ],
+                "scheduledState": "RUNNING",
+                "retryCount": 10,
+                "retriedRelationships": [],
+                "backoffMechanism": "PENALIZE_FLOWFILE",
+                "maxBackoffPeriod": "10 mins",
+                "componentType": "PROCESSOR",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
             }
         ],
-        "inputPorts": [],
+        "inputPorts": [
+            {
+                "identifier": "7da3a8e6-6f5f-3a34-a0c9-f42a50068e61",
+                "instanceIdentifier": "c12f987d-017e-1000-de92-17bdff9f8b21",
+                "name": "ProvInput",
+                "comments": "",
+                "position": {
+                    "x": 736.0,
+                    "y": 0.0
+                },
+                "type": "INPUT_PORT",
+                "concurrentlySchedulableTaskCount": 1,
+                "scheduledState": "RUNNING",
+                "allowRemoteAccess": true,
+                "componentType": "INPUT_PORT",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            },
+            {
+                "identifier": "788b8882-1af6-3ffe-bf8d-9c34cf1b921d",
+                "instanceIdentifier": "c11a3c30-017e-1000-f2f0-17232c042b30",
+                "name": "BravoInput",
+                "comments": "",
+                "position": {
+                    "x": 272.0,
+                    "y": 0.0
+                },
+                "type": "INPUT_PORT",
+                "concurrentlySchedulableTaskCount": 1,
+                "scheduledState": "RUNNING",
+                "allowRemoteAccess": true,
+                "componentType": "INPUT_PORT",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            }
+        ],
         "outputPorts": [],
         "connections": [
             {
-                "identifier": "c029b085-4116-3a68-865c-c9b4e5369d4a",
-                "instanceIdentifier": "c120776b-017e-1000-6cdc-3639cebe805e",
+                "identifier": "493b9dbb-4615-3d70-86ca-585b19f6618b",
+                "instanceIdentifier": "c11aa559-017e-1000-c24b-fb6ccb999e60",
                 "name": "",
                 "source": {
-                    "id": "fc18decd-e88f-3237-9ddd-6040b5a1bbd2",
-                    "type": "PROCESSOR",
-                    "groupId": "0577156e-9f00-3875-bd81-c72d73a1fb85",
-                    "name": "GenerateFlowFile",
-                    "comments": "",
-                    "instanceIdentifier": "c1202f8e-017e-1000-a733-50c5cb8784b1"
-                },
-                "destination": {
-                    "id": "67ea2c8e-9824-3d6b-a03c-cdbfafe7ced9",
-                    "type": "REMOTE_INPUT_PORT",
-                    "groupId": "a144ea1f-a059-32a3-8b0a-1ef108a34d2a",
+                    "id": "788b8882-1af6-3ffe-bf8d-9c34cf1b921d",
+                    "type": "INPUT_PORT",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
                     "name": "BravoInput",
                     "comments": "",
-                    "instanceIdentifier": "eccfb75d-417c-38d5-be12-cdffc1189223"
+                    "instanceIdentifier": "c11a3c30-017e-1000-f2f0-17232c042b30"
+                },
+                "destination": {
+                    "id": "2eba9297-486f-3db8-922c-67f01192001f",
+                    "type": "PROCESSOR",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "UpdateAttribute",
+                    "comments": "",
+                    "instanceIdentifier": "c11a6e7f-017e-1000-cdd8-2d3e424d7225"
                 },
                 "labelIndex": 1,
                 "zIndex": 0,
                 "selectedRelationships": [
-                    "success"
+                    ""
                 ],
                 "backPressureObjectThreshold": 10000,
                 "backPressureDataSizeThreshold": "1 GB",
@@ -214,7 +199,43 @@
                 "partitioningAttribute": "",
                 "loadBalanceCompression": "DO_NOT_COMPRESS",
                 "componentType": "CONNECTION",
-                "groupIdentifier": "0577156e-9f00-3875-bd81-c72d73a1fb85"
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            },
+            {
+                "identifier": "f4cf4e96-794c-3188-9442-9087155c5b02",
+                "instanceIdentifier": "c13023be-017e-1000-d1fd-b1eaa0ad742d",
+                "name": "",
+                "source": {
+                    "id": "7da3a8e6-6f5f-3a34-a0c9-f42a50068e61",
+                    "type": "INPUT_PORT",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "ProvInput",
+                    "comments": "",
+                    "instanceIdentifier": "c12f987d-017e-1000-de92-17bdff9f8b21"
+                },
+                "destination": {
+                    "id": "966769d6-47f6-333a-a0af-ce21eab66f20",
+                    "type": "PROCESSOR",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "UpdateAttribute",
+                    "comments": "",
+                    "instanceIdentifier": "c130053e-017e-1000-e581-48dcfc185038"
+                },
+                "labelIndex": 1,
+                "zIndex": 0,
+                "selectedRelationships": [
+                    ""
+                ],
+                "backPressureObjectThreshold": 10000,
+                "backPressureDataSizeThreshold": "1 GB",
+                "flowFileExpiration": "0 sec",
+                "prioritizers": [],
+                "bends": [],
+                "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+                "partitioningAttribute": "",
+                "loadBalanceCompression": "DO_NOT_COMPRESS",
+                "componentType": "CONNECTION",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
             }
         ],
         "labels": [],
