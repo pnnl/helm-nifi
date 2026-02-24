@@ -186,11 +186,23 @@ spec:
           bin/nifi.sh set-single-user-credentials {{ .Values.auth.singleUser.username }} {{ .Values.auth.singleUser.password }}
 {{- end }}
 
-{{ if .Values.customFlow }}
+{{- if and (eq .Values.properties.flowConfigurationFormat "xml") (semverCompare ">2.0.0" .Values.image.tag) }}
+{{- fail "XML flow configuration format is not supported in NiFi versions greater than 2.0.0. Please use 'json' format instead." }}
+{{- end }}
+{{- if .Values.customFlow }}
+{{- if eq .Values.properties.flowConfigurationFormat "json" }} 
+          gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.json.gz
+{{- else if eq .Values.properties.flowConfigurationFormat "xml" }}
           gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.xml.gz
 {{- else }}
-          if ! test -f /opt/nifi/data/flow.xml.gz && test -f /opt/nifi/data/flow.xml; then
-            gzip /opt/nifi/data/flow.xml
+          echo "Cannot use custom flow: flowConfigurationFormat is not one of [xml, json]"
+          if ! test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}.gz && test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}; then
+            gzip /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}
+          fi
+{{- end }}
+{{- else }}
+          if ! test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}.gz && test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}; then
+            gzip /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}
           fi
 {{- end }}
 
@@ -254,10 +266,9 @@ spec:
           done
 
 {{- /* if .Values.certManager.enabled */}}{{- else }}
-{{- $appVersion := .Chart.AppVersion -}}
-{{- $requiredVersion := "2.0.0" -}}
-{{- if lt $appVersion $requiredVersion }}
+{{- if (semverCompare ">2.0.0" .Values.image.tag) }}
           echo "NIFI TLS-TOOLKIT DEPRECATED -- FULLY REMOVED IN 2.x.x"
+{{- else }}
           if [ ! -r "${NIFI_HOME}/conf/nifi-cert.pem" ]
           then
             /opt/nifi/nifi-toolkit-current/bin/tls-toolkit.sh standalone \
@@ -268,7 +279,7 @@ spec:
               -S {{.Values.auth.SSL.keystorePasswd}} \
               --nifiPropertiesFile /opt/nifi/nifi-current/conf/nifi.properties
           fi
-{{- /* if if gt $appVersion $requiredVersion */ -}}{{- end }}
+{{- /* if (semverCompare ">2.0.0" .Values.image.tag) */ -}}{{- end }}
 {{- /* if .Values.certManager.enabled */ -}}{{- end }}
 
 {{- if .Values.properties.safetyValve }}

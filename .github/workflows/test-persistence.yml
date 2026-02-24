@@ -85,7 +85,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Minikube
-      - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.15.0
         with:
           minikube version: 'v1.38.0'
