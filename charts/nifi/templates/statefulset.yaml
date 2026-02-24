@@ -186,7 +186,7 @@ spec:
           bin/nifi.sh set-single-user-credentials {{ .Values.auth.singleUser.username }} {{ .Values.auth.singleUser.password }}
 {{- end }}
 
-{{- if and (eq .Values.properties.flowConfigurationFormat "xml") (semverCompare ">2.0.0" .Values.image.tag) }}
+{{- if and (eq .Values.properties.flowConfigurationFormat "xml") (semverCompare ">=2.0.0" .Values.image.tag) }}
 {{- fail "XML flow configuration format is not supported in NiFi versions greater than 2.0.0. Please use 'json' format instead." }}
 {{- end }}
 {{- if .Values.customFlow }}
@@ -266,7 +266,7 @@ spec:
           done
 
 {{- /* if .Values.certManager.enabled */}}{{- else }}
-{{- if (semverCompare ">2.0.0" .Values.image.tag) }}
+{{- if (semverCompare ">=2.0.0" .Values.image.tag) }}
           echo "NIFI TLS-TOOLKIT DEPRECATED -- FULLY REMOVED IN 2.x.x"
 {{- else }}
           if [ ! -r "${NIFI_HOME}/conf/nifi-cert.pem" ]
@@ -279,7 +279,7 @@ spec:
               -S {{.Values.auth.SSL.keystorePasswd}} \
               --nifiPropertiesFile /opt/nifi/nifi-current/conf/nifi.properties
           fi
-{{- /* if (semverCompare ">2.0.0" .Values.image.tag) */ -}}{{- end }}
+{{- /* if (semverCompare ">=2.0.0" .Values.image.tag) */ -}}{{- end }}
 {{- /* if .Values.certManager.enabled */ -}}{{- end }}
 
 {{- if .Values.properties.safetyValve }}
