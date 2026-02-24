@@ -119,6 +119,7 @@ jobs:
             fi
             sleep 30
           done
+          kubectl logs pod/nifi-0 -c app-log
           echo NiFi did not provide an access token for 300 seconds!
           exit 1
       - name: Delete chart

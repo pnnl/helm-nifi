@@ -42,3 +42,4 @@ jobs:
             fi
             sleep 30
           done
+          kubectl logs pod/nifi-0 -c app-log

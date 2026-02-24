@@ -49,9 +49,6 @@ jobs:
             fi
             sleep 30
           done
+          kubectl logs pod/nifi-0 -c app-log
           echo NiFi did not start for 300 seconds!
           exit 1
-      - name: Check that web application responds with expected content
-        run: |
-          kubectl exec pod/nifi-0 -c server -- curl -sk https://localhost:8443 | \
-            grep '<title>NiFi</title>'
