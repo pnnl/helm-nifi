@@ -268,7 +268,7 @@
             NOTE: Any identity mapping rules specified in nifi.properties will also be applied to the node identities,
             so the values should be the unmapped identities (i.e. full DN from a certificate).
     -->
-    {{- if .Values.auth.ldap.enabled}}
+    {{- if and (.Values.auth.ldap.enabled) (semverCompare "<=2.0.0" .Values.image.tag) }}
     <authorizer>
         <identifier>file-provider</identifier>
         <class>org.apache.nifi.authorization.FileAuthorizer</class>
