@@ -75,6 +75,10 @@ jobs:
             fi
             sleep 30
           done
+          kubectl -n bravo get pods 
+          kubectl -n alpha get pods 
+
+          kubectl -n bravo exec nifi-0 -c server -- curl -s -k -H "Authorization: Bearer $(curl -s -d "username=username&password=changemechangeme" https://localhost:8443/nifi-api/access/token -k)" https://localhost:8443/nifi-api/flow/metrics/prometheus
           echo Got no items for 300 seconds!
           echo ===ALPHA SERVER LOGS===
           kubectl -n alpha logs pod/nifi-0 -c server
