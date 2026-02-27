@@ -404,8 +404,8 @@ certManager:
     tag:
     pullPolicy: "IfNotPresent"
   clusterDomain: cluster.local
-  keystorePasswd: #changeme
-  truststorePasswd: #changeme
+  keystorePasswd: changeme
+  truststorePasswd: changeme
   replaceDefaultTrustStore: false
   additionalDnsNames:
     - localhost
