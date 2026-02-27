@@ -177,7 +177,7 @@ spec:
                                     --insert "authorizers/userGroupProvider/property[not(@name)]" --type attr -n name \
                                     --value "Initial User Identity {{ . }}" \
                                     "${NIFI_HOME}/conf/authorizers.xml"
-            {{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{ end }}
+            {{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{- end }}
           {{- end }}
 {{- else if .Values.auth.clientAuth.enabled }}
           cat "${NIFI_HOME}/conf/authorizers.temp" > "${NIFI_HOME}/conf/authorizers.xml"
@@ -186,13 +186,25 @@ spec:
           bin/nifi.sh set-single-user-credentials {{ .Values.auth.singleUser.username }} {{ .Values.auth.singleUser.password }}
 {{- end }}
 
-{{ if .Values.customFlow }}
+{{- if and (eq .Values.properties.flowConfigurationFormat "xml") (semverCompare ">=2.0.0" .Values.image.tag) }}
+{{- fail "XML flow configuration format is not supported in NiFi versions greater than 2.0.0. Please use 'json' format instead." }}
+{{- end }}
+{{- if .Values.customFlow }}
+{{- if eq .Values.properties.flowConfigurationFormat "json" }} 
+          gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.json.gz
+{{- else if eq .Values.properties.flowConfigurationFormat "xml" }}
           gzip < {{ .Values.customFlow }} > /opt/nifi/data/flow.xml.gz
-{{ else }}
-          if ! test -f /opt/nifi/data/flow.xml.gz && test -f /opt/nifi/data/flow.xml; then
-            gzip /opt/nifi/data/flow.xml
+{{- else }}
+          echo "Cannot use custom flow: flowConfigurationFormat is not one of [xml, json]"
+          if ! test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}.gz && test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}; then
+            gzip /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}
           fi
-{{ end }}
+{{- end }}
+{{- else }}
+          if ! test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}.gz && test -f /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}; then
+            gzip /opt/nifi/data/flow.{{ .Values.properties.flowConfigurationFormat }}
+          fi
+{{- end }}
 
           prop_replace nifi.ui.banner.text $(hostname -s)
           prop_replace nifi.remote.input.host ${FQDN}
@@ -222,13 +234,13 @@ spec:
                         --insert "authorizers/userGroupProvider/property[not(@name)]" --type attr -n name \
                           --value "Initial User Identity {{ . }}" \
                         "${NIFI_HOME}/conf/authorizers.xml"
-{{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{ end }}
+{{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{- end }}
 
-          prop_replace nifi.security.keystore "${NIFI_HOME}/tls/keystore.jks"
-          prop_replace nifi.security.keystoreType JKS
+          prop_replace nifi.security.keystore "${NIFI_HOME}/tls/keystore.p12"
+          prop_replace nifi.security.keystoreType PKCS12
           prop_replace nifi.security.keystorePasswd "{{ .Values.certManager.keystorePasswd }}"
-          prop_replace nifi.security.truststore "${NIFI_HOME}/tls/truststore.jks"
-          prop_replace nifi.security.truststoreType JKS
+          prop_replace nifi.security.truststore "${NIFI_HOME}/tls/truststore.p12"
+          prop_replace nifi.security.truststoreType PKCS12
           prop_replace nifi.security.truststorePasswd "{{ .Values.certManager.truststorePasswd }}"
 
           prop_replace nifi.web.https.host "$(hostname).{{ template "apache-nifi.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.certManager.clusterDomain }}"
@@ -241,20 +253,22 @@ spec:
           prop_replace nifi.security.autoreload.enabled true
           prop_replace nifi.security.autoreload.interval "{{ .Values.certManager.refreshSeconds }} secs"
 
-          while [ ! -r "${NIFI_HOME}/tls/truststore.jks" ]
+          while [ ! -r "${NIFI_HOME}/tls/truststore.p12" ]
           do
-            echo "${NIFI_HOME}/tls/truststore.jks" is not readable!  Waiting for cert-manager sidecar to populate it.
+            echo "${NIFI_HOME}/tls/truststore.p12" is not readable!  Waiting for cert-manager sidecar to populate it.
             sleep 2
           done
 
-          while [ ! -r "${NIFI_HOME}/tls/keystore.jks" ]
+          while [ ! -r "${NIFI_HOME}/tls/keystore.p12" ]
           do
-            echo "${NIFI_HOME}/tls/keystore.jks" is not readable!  Waiting for cert-manager sidecar to populate it.
+            echo "${NIFI_HOME}/tls/keystore.p12" is not readable!  Waiting for cert-manager sidecar to populate it.
             sleep 2
           done
 
-{{- /* if .Values.certManager.enabled */}}{{ else }}
-
+{{- /* if .Values.certManager.enabled */}}{{- else }}
+{{- if (semverCompare ">=2.0.0" .Values.image.tag) }}
+          echo "NIFI TLS-TOOLKIT DEPRECATED -- FULLY REMOVED IN 2.x.x"
+{{- else }}
           if [ ! -r "${NIFI_HOME}/conf/nifi-cert.pem" ]
           then
             /opt/nifi/nifi-toolkit-current/bin/tls-toolkit.sh standalone \
@@ -265,8 +279,8 @@ spec:
               -S {{.Values.auth.SSL.keystorePasswd}} \
               --nifiPropertiesFile /opt/nifi/nifi-current/conf/nifi.properties
           fi
-
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if (semverCompare ">=2.0.0" .Values.image.tag) */ -}}{{- end }}
+{{- /* if .Values.certManager.enabled */ -}}{{- end }}
 
 {{- if .Values.properties.safetyValve }}
   {{- range $prop, $val := .Values.properties.safetyValve }}
@@ -279,13 +293,13 @@ spec:
           then
 {{- if .Values.properties.sensitiveKeyPrior }}
             prop_replace nifi.sensitive.props.key {{ .Values.properties.sensitiveKeyPrior | quote }}
-{{- /* if .Values.properties.sensitiveKeyPrior */}}{{ else }}
+{{- /* if .Values.properties.sensitiveKeyPrior */}}{{- else }}
             prop_replace nifi.sensitive.props.key ""
-{{- /* if .Values.properties.sensitiveKeyPrior */}}{{ end }}
+{{- /* if .Values.properties.sensitiveKeyPrior */}}{{- end }}
             bin/nifi.sh set-sensitive-properties-key {{ .Values.properties.sensitiveKey | quote }}
             touch {{ .Values.properties.sensitiveKeySetFile | quote }}
           fi
-{{- /* if .Values.properties.sensitiveKeySetFile */}}{{ end }}
+{{- /* if .Values.properties.sensitiveKeySetFile */}}{{- end }}
 
           for f in "${NIFI_HOME}/conf/authorizers.xml" "${NIFI_HOME}/conf/login-identity-providers.xml" ${NIFI_HOME}/conf/nifi.properties
           do
@@ -573,7 +587,7 @@ spec:
           - name: "tls"
             mountPath: /opt/nifi/nifi-current/tls
             readOnly: true
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if .Values.certManager.enabled */}}{{- end }}
           {{- if .Values.extraVolumeMounts }}
 {{ toYaml .Values.extraVolumeMounts | indent 10 }}
           {{- end }}
@@ -631,7 +645,11 @@ spec:
 {{- if .Values.certManager.enabled }}
       - name: cert-manager
         imagePullPolicy: {{ .Values.certManager.image.pullPolicy | quote }}
-        image: "{{ .Values.certManager.image.repository }}:{{ .Values.certManager.image.tag }}"
+        {{- if and .Values.certManager.image.repository .Values.certManager.image.tag }}
+        image: {{ .Values.certManager.image.repository }}:{{ .Values.certManager.image.tag }}
+        {{- else }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        {{- end }}
         command:
         - bash
         - -ce
@@ -662,7 +680,7 @@ spec:
           jq -r '."ca.crt"' < /tmp/secret-data.json | base64 -d > "${NIFI_HOME}"/tls/cert-manager/ca.crt
           touch /tmp/tls.crt.old
             
-          rm -f "${NIFI_HOME}/tls/truststore-new.jks"
+          rm -f "${NIFI_HOME}/tls/truststore-new.p12"
           for ca in "${NIFI_HOME}"/tls/*/ca.crt
           do
             ALIAS=$(echo $ca | awk -F "/" '{print $(NF-1) }' -)
@@ -670,14 +688,14 @@ spec:
                     -noprompt \
                     -trustcacerts \
                     -alias $ALIAS \
-                    -storetype JKS \
+                    -storetype PKCS12 \
                     -file $ca \
-                    -keystore "${NIFI_HOME}/tls/truststore-new.jks" \
+                    -keystore "${NIFI_HOME}/tls/truststore-new.p12" \
                     -storepass "{{ .Values.certManager.truststorePasswd }}"
           done
-          keytool -list -keystore "${NIFI_HOME}/tls/truststore-new.jks" \
+          keytool -list -keystore "${NIFI_HOME}/tls/truststore-new.p12" \
                         -storepass "{{ .Values.certManager.truststorePasswd }}"
-          mv "${NIFI_HOME}/tls/truststore-new.jks" "${NIFI_HOME}/tls/truststore.jks"
+          mv "${NIFI_HOME}/tls/truststore-new.p12" "${NIFI_HOME}/tls/truststore.p12"
 
           while :
           do
@@ -691,21 +709,21 @@ spec:
                                      -name    "${NODENAME}" \
                                      -out     "/tmp/tls.p12" \
                                      -passout "pass:{{ .Values.certManager.keystorePasswd }}"
-              rm -f "${NIFI_HOME}/tls/keystore-new.jks"
+              rm -f "${NIFI_HOME}/tls/keystore-new.p12"
               keytool -importkeystore \
                       -noprompt \
-                      -destkeystore "${NIFI_HOME}/tls/keystore-new.jks" \
+                      -destkeystore "${NIFI_HOME}/tls/keystore-new.p12" \
                       -srckeystore "/tmp/tls.p12" \
                       -srcstoretype PKCS12 \
-                      -deststoretype JKS \
+                      -deststoretype PKCS12 \
                       -srcstorepass "{{ .Values.certManager.keystorePasswd }}" \
                       -deststorepass "{{ .Values.certManager.keystorePasswd }}"
-              mv  "${NIFI_HOME}/tls/keystore-new.jks" "${NIFI_HOME}/tls/keystore.jks"
+              mv  "${NIFI_HOME}/tls/keystore-new.p12" "${NIFI_HOME}/tls/keystore.p12"
               mv /tmp/tls.crt /tmp/tls.crt.old
             fi
 
-            ls -l "${NIFI_HOME}/tls/keystore.jks"
-            keytool -list -keystore "${NIFI_HOME}/tls/keystore.jks" \
+            ls -l "${NIFI_HOME}/tls/keystore.p12"
+            keytool -list -keystore "${NIFI_HOME}/tls/keystore.p12" \
                           -storepass "{{ .Values.certManager.keystorePasswd }}"
 
             echo Starting to sleep for {{ .Values.certManager.refreshSeconds }} seconds at $(date)
@@ -736,7 +754,7 @@ spec:
           - name: {{ include "apache-nifi.fullname" $ }}-{{ $secret }}
             mountPath: /opt/nifi/nifi-current/tls/{{ $secret }}
             readOnly: true
-          {{ end }}
+          {{- end }}
           {{- range $configmap := .Values.configmaps }}
             {{- if $configmap.mountPath }}
               {{- if $configmap.keys }}
@@ -755,10 +773,10 @@ spec:
           {{- end }}
           {{- if .Values.extraVolumeMounts }}
 {{ toYaml .Values.extraVolumeMounts | indent 10 }}
-          {{/* if .Values.extraVolumeMounts */}}{{ end }}
+          {{/* if .Values.extraVolumeMounts */}}{{- end }}
         resources:
 {{ toYaml .Values.certManager.resources | indent 10 }}
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if .Values.certManager.enabled */}}{{- end }}
       volumes:
       {{- range $initContainer := .Values.initContainers }}
         {{- with $initContainer.volumes }}
@@ -826,7 +844,7 @@ spec:
         secret:
           secretName: {{ . }}
       {{- end }}
-{{- /* if .Values.certManager.enabled */}}{{ end }}
+{{- /* if .Values.certManager.enabled */}}{{- end }}
       {{- range .Values.secrets }}
       - name: {{ include "apache-nifi.fullname" $ }}-{{ .name }}
         secret:

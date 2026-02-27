@@ -41,7 +41,7 @@ jobs:
         run: |
           for n in [ 0 1 2 3 4 5 6 7 8 9 ]
           do
-            if kubectl -n bravo logs pod/nifi-0 -c app-log | grep 'JettyServer NiFi has started'
+            if kubectl -n bravo logs pod/nifi-0 -c app-log | grep -E "JettyServer(\b Nifi\b)? Started Server"
             then
               exit 0
             fi
@@ -65,7 +65,8 @@ jobs:
         run: |
           for n in [ 0 1 2 3 4 5 6 7 8 9 ]
           do
-            ITEMS=$(kubectl -n bravo exec nifi-0 -c server -- curl -s http://localhost:9092/metrics/ | grep 'name="BravoInput"' | grep ^nifi_amount_items_output | cut -f2 -d' ')
+            TOKEN=$(kubectl -n bravo exec nifi-0 -c server -- curl -s -d "username=username&password=changemechangeme" https://localhost:8443/nifi-api/access/token -k)
+            ITEMS=$(kubectl -n bravo exec nifi-0 -c server -- curl -s -k -H "Authorization: Bearer $TOKEN" https://localhost:8443/nifi-api/flow/metrics/prometheus | grep 'name="BravoInput"' | grep ^nifi_amount_items_output | cut -f2 -d' ')
             echo Got $ITEMS items so far
             if [ $ITEMS != "0.0" ]
             then

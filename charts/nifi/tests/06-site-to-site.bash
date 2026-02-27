@@ -12,7 +12,7 @@ do
       name: $ns
     ---
 ENDOFYAML
-  kubectl -n $ns create --dry-run=client configmap flow-xml --from-file=tests/06-$ns.flow.xml -o yaml | kubectl apply -f -
+  kubectl -n $ns create --dry-run=client configmap flow-json --from-file=tests/06-$ns.flow.json -o yaml | kubectl apply -f -
 done
 
 # Install NiFi expecting secrets:
@@ -24,12 +24,13 @@ helm -n alpha install nifi . \
   --set replicaCount=1 \
   --set registry.enabled=false \
   --set certManager.enabled=true \
-  --set configmaps[0].name=flow-xml \
-  --set configmaps[0].mountPath=/opt/nifi/flow-xml \
-  --set customFlow=/opt/nifi/flow-xml/06-alpha.flow.xml \
+  --set configmaps[0].name=flow-json \
+  --set configmaps[0].mountPath=/opt/nifi/flow-json \
+  --set customFlow=/opt/nifi/flow-json/06-alpha.flow.json \
   --set certManager.caDuration=1h \
   --set certManager.refreshSeconds=30 \
-  --set 'certManager.caSecrets[0]=bravo-ca'
+  --set 'certManager.caSecrets[0]=bravo-ca' \
+  --set metrics.prometheus.enabled=true 
 
 helm -n bravo install nifi . \
   --set zookeeper.enabled=false \
@@ -38,12 +39,13 @@ helm -n bravo install nifi . \
   --set replicaCount=1 \
   --set registry.enabled=false \
   --set certManager.enabled=true \
-  --set configmaps[0].name=flow-xml \
-  --set configmaps[0].mountPath=/opt/nifi/flow-xml \
-  --set customFlow=/opt/nifi/flow-xml/06-bravo.flow.xml \
+  --set configmaps[0].name=flow-json \
+  --set configmaps[0].mountPath=/opt/nifi/flow-json \
+  --set customFlow=/opt/nifi/flow-json/06-bravo.flow.json \
   --set certManager.caDuration=1h \
   --set certManager.refreshSeconds=30 \
-  --set 'certManager.caSecrets[0]=alpha-ca'
+  --set 'certManager.caSecrets[0]=alpha-ca' \
+  --set metrics.prometheus.enabled=true 
 
 # Copy certificate authorities from one namespace to the other
 

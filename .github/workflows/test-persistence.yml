@@ -85,7 +85,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Minikube
-      - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.15.0
         with:
           minikube version: 'v1.38.0'
@@ -120,6 +119,7 @@ jobs:
             fi
             sleep 30
           done
+          kubectl logs pod/nifi-0 -c app-log
           echo NiFi did not provide an access token for 300 seconds!
           exit 1
       - name: Delete chart

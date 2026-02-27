@@ -1,0 +1,252 @@
+{
+    "encodingVersion": {
+        "majorVersion": 2,
+        "minorVersion": 0
+    },
+    "maxTimerDrivenThreadCount": 10,
+    "maxEventDrivenThreadCount": 5,
+    "registries": [],
+    "parameterContexts": [],
+    "parameterProviders": [],
+    "controllerServices": [],
+    "reportingTasks": [
+        {
+            "identifier": "c2b0c85e-017e-1000-0f6d-53ed5df3eb43",
+            "instanceIdentifier": "c2b0c85e-017e-1000-0f6d-53ed5df3eb43",
+            "name": "PrometheusReportingTask",
+            "comments": "",
+            "type": "org.apache.nifi.reporting.prometheus.PrometheusReportingTask",
+            "bundle": {
+                "group": "org.apache.nifi",
+                "artifact": "nifi-prometheus-nar",
+                "version": "1.28.1"
+            },
+            "properties": {
+                "prometheus-reporting-task-metrics-endpoint-port": "9092",
+                "prometheus-reporting-task-metrics-strategy": "All Components",
+                "prometheus-reporting-task-instance-id": "${hostname(true)}",
+                "prometheus-reporting-task-client-auth": "No Authentication",
+                "prometheus-reporting-task-metrics-send-jvm": "false"
+            },
+            "propertyDescriptors": {},
+            "scheduledState": "RUNNING",
+            "schedulingPeriod": "5 sec",
+            "schedulingStrategy": "TIMER_DRIVEN",
+            "componentType": "REPORTING_TASK"
+        }
+    ],
+    "templates": [],
+    "rootGroup": {
+        "identifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+        "instanceIdentifier": "356a3caa-e4c2-492d-9c1d-e040d8a3b5be",
+        "name": "BRAVO",
+        "comments": "",
+        "position": {
+            "x": 0.0,
+            "y": 0.0
+        },
+        "processGroups": [],
+        "remoteProcessGroups": [],
+        "processors": [
+            {
+                "identifier": "966769d6-47f6-333a-a0af-ce21eab66f20",
+                "instanceIdentifier": "c130053e-017e-1000-e581-48dcfc185038",
+                "name": "UpdateAttribute",
+                "comments": "",
+                "position": {
+                    "x": 680.0,
+                    "y": 256.0
+                },
+                "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+                "bundle": {
+                    "group": "org.apache.nifi",
+                    "artifact": "nifi-update-attribute-nar",
+                    "version": "1.28.1"
+                },
+                "properties": {
+                    "Store State": "Do not store state",
+                    "canonical-value-lookup-cache-size": "100"
+                },
+                "propertyDescriptors": {},
+                "style": {},
+                "schedulingPeriod": "0 sec",
+                "schedulingStrategy": "TIMER_DRIVEN",
+                "executionNode": "ALL",
+                "penaltyDuration": "30 sec",
+                "yieldDuration": "1 sec",
+                "bulletinLevel": "WARN",
+                "runDurationMillis": 0,
+                "concurrentlySchedulableTaskCount": 1,
+                "autoTerminatedRelationships": [
+                    "success"
+                ],
+                "scheduledState": "RUNNING",
+                "retryCount": 10,
+                "retriedRelationships": [],
+                "backoffMechanism": "PENALIZE_FLOWFILE",
+                "maxBackoffPeriod": "10 mins",
+                "componentType": "PROCESSOR",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            },
+            {
+                "identifier": "2eba9297-486f-3db8-922c-67f01192001f",
+                "instanceIdentifier": "c11a6e7f-017e-1000-cdd8-2d3e424d7225",
+                "name": "UpdateAttribute",
+                "comments": "",
+                "position": {
+                    "x": 216.0,
+                    "y": 256.0
+                },
+                "type": "org.apache.nifi.processors.attributes.UpdateAttribute",
+                "bundle": {
+                    "group": "org.apache.nifi",
+                    "artifact": "nifi-update-attribute-nar",
+                    "version": "1.28.1"
+                },
+                "properties": {
+                    "Store State": "Do not store state",
+                    "canonical-value-lookup-cache-size": "100"
+                },
+                "propertyDescriptors": {},
+                "style": {},
+                "schedulingPeriod": "0 sec",
+                "schedulingStrategy": "TIMER_DRIVEN",
+                "executionNode": "ALL",
+                "penaltyDuration": "30 sec",
+                "yieldDuration": "1 sec",
+                "bulletinLevel": "WARN",
+                "runDurationMillis": 0,
+                "concurrentlySchedulableTaskCount": 1,
+                "autoTerminatedRelationships": [
+                    "success"
+                ],
+                "scheduledState": "RUNNING",
+                "retryCount": 10,
+                "retriedRelationships": [],
+                "backoffMechanism": "PENALIZE_FLOWFILE",
+                "maxBackoffPeriod": "10 mins",
+                "componentType": "PROCESSOR",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            }
+        ],
+        "inputPorts": [
+            {
+                "identifier": "7da3a8e6-6f5f-3a34-a0c9-f42a50068e61",
+                "instanceIdentifier": "c12f987d-017e-1000-de92-17bdff9f8b21",
+                "name": "ProvInput",
+                "comments": "",
+                "position": {
+                    "x": 736.0,
+                    "y": 0.0
+                },
+                "type": "INPUT_PORT",
+                "concurrentlySchedulableTaskCount": 1,
+                "scheduledState": "RUNNING",
+                "allowRemoteAccess": true,
+                "componentType": "INPUT_PORT",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            },
+            {
+                "identifier": "788b8882-1af6-3ffe-bf8d-9c34cf1b921d",
+                "instanceIdentifier": "c11a3c30-017e-1000-f2f0-17232c042b30",
+                "name": "BravoInput",
+                "comments": "",
+                "position": {
+                    "x": 272.0,
+                    "y": 0.0
+                },
+                "type": "INPUT_PORT",
+                "concurrentlySchedulableTaskCount": 1,
+                "scheduledState": "RUNNING",
+                "allowRemoteAccess": true,
+                "componentType": "INPUT_PORT",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            }
+        ],
+        "outputPorts": [],
+        "connections": [
+            {
+                "identifier": "493b9dbb-4615-3d70-86ca-585b19f6618b",
+                "instanceIdentifier": "c11aa559-017e-1000-c24b-fb6ccb999e60",
+                "name": "",
+                "source": {
+                    "id": "788b8882-1af6-3ffe-bf8d-9c34cf1b921d",
+                    "type": "INPUT_PORT",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "BravoInput",
+                    "comments": "",
+                    "instanceIdentifier": "c11a3c30-017e-1000-f2f0-17232c042b30"
+                },
+                "destination": {
+                    "id": "2eba9297-486f-3db8-922c-67f01192001f",
+                    "type": "PROCESSOR",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "UpdateAttribute",
+                    "comments": "",
+                    "instanceIdentifier": "c11a6e7f-017e-1000-cdd8-2d3e424d7225"
+                },
+                "labelIndex": 1,
+                "zIndex": 0,
+                "selectedRelationships": [
+                    ""
+                ],
+                "backPressureObjectThreshold": 10000,
+                "backPressureDataSizeThreshold": "1 GB",
+                "flowFileExpiration": "0 sec",
+                "prioritizers": [],
+                "bends": [],
+                "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+                "partitioningAttribute": "",
+                "loadBalanceCompression": "DO_NOT_COMPRESS",
+                "componentType": "CONNECTION",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            },
+            {
+                "identifier": "f4cf4e96-794c-3188-9442-9087155c5b02",
+                "instanceIdentifier": "c13023be-017e-1000-d1fd-b1eaa0ad742d",
+                "name": "",
+                "source": {
+                    "id": "7da3a8e6-6f5f-3a34-a0c9-f42a50068e61",
+                    "type": "INPUT_PORT",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "ProvInput",
+                    "comments": "",
+                    "instanceIdentifier": "c12f987d-017e-1000-de92-17bdff9f8b21"
+                },
+                "destination": {
+                    "id": "966769d6-47f6-333a-a0af-ce21eab66f20",
+                    "type": "PROCESSOR",
+                    "groupId": "c0abc477-24f9-3a25-b8b4-47fc9ba97124",
+                    "name": "UpdateAttribute",
+                    "comments": "",
+                    "instanceIdentifier": "c130053e-017e-1000-e581-48dcfc185038"
+                },
+                "labelIndex": 1,
+                "zIndex": 0,
+                "selectedRelationships": [
+                    ""
+                ],
+                "backPressureObjectThreshold": 10000,
+                "backPressureDataSizeThreshold": "1 GB",
+                "flowFileExpiration": "0 sec",
+                "prioritizers": [],
+                "bends": [],
+                "loadBalanceStrategy": "DO_NOT_LOAD_BALANCE",
+                "partitioningAttribute": "",
+                "loadBalanceCompression": "DO_NOT_COMPRESS",
+                "componentType": "CONNECTION",
+                "groupIdentifier": "c0abc477-24f9-3a25-b8b4-47fc9ba97124"
+            }
+        ],
+        "labels": [],
+        "funnels": [],
+        "controllerServices": [],
+        "variables": {},
+        "defaultFlowFileExpiration": "0 sec",
+        "defaultBackPressureObjectThreshold": 10000,
+        "defaultBackPressureDataSizeThreshold": "1 GB",
+        "flowFileConcurrency": "UNBOUNDED",
+        "flowFileOutboundPolicy": "STREAM_WHEN_AVAILABLE",
+        "componentType": "PROCESS_GROUP"
+    }
+}
