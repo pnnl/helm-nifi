@@ -236,11 +236,11 @@ spec:
                         "${NIFI_HOME}/conf/authorizers.xml"
 {{/* range untilStep 0 (int .Values.replicaCount ) 1 */}}{{- end }}
 
-          prop_replace nifi.security.keystore "${NIFI_HOME}/tls/keystore.jks"
-          prop_replace nifi.security.keystoreType JKS
+          prop_replace nifi.security.keystore "${NIFI_HOME}/tls/keystore.p12"
+          prop_replace nifi.security.keystoreType PKCS12
           prop_replace nifi.security.keystorePasswd "{{ .Values.certManager.keystorePasswd }}"
-          prop_replace nifi.security.truststore "${NIFI_HOME}/tls/truststore.jks"
-          prop_replace nifi.security.truststoreType JKS
+          prop_replace nifi.security.truststore "${NIFI_HOME}/tls/truststore.p12"
+          prop_replace nifi.security.truststoreType PKCS12
           prop_replace nifi.security.truststorePasswd "{{ .Values.certManager.truststorePasswd }}"
 
           prop_replace nifi.web.https.host "$(hostname).{{ template "apache-nifi.fullname" $ }}-headless.{{ $.Release.Namespace }}.svc.{{ $.Values.certManager.clusterDomain }}"
@@ -253,15 +253,15 @@ spec:
           prop_replace nifi.security.autoreload.enabled true
           prop_replace nifi.security.autoreload.interval "{{ .Values.certManager.refreshSeconds }} secs"
 
-          while [ ! -r "${NIFI_HOME}/tls/truststore.jks" ]
+          while [ ! -r "${NIFI_HOME}/tls/truststore.p12" ]
           do
-            echo "${NIFI_HOME}/tls/truststore.jks" is not readable!  Waiting for cert-manager sidecar to populate it.
+            echo "${NIFI_HOME}/tls/truststore.p12" is not readable!  Waiting for cert-manager sidecar to populate it.
             sleep 2
           done
 
-          while [ ! -r "${NIFI_HOME}/tls/keystore.jks" ]
+          while [ ! -r "${NIFI_HOME}/tls/keystore.p12" ]
           do
-            echo "${NIFI_HOME}/tls/keystore.jks" is not readable!  Waiting for cert-manager sidecar to populate it.
+            echo "${NIFI_HOME}/tls/keystore.p12" is not readable!  Waiting for cert-manager sidecar to populate it.
             sleep 2
           done
 
@@ -680,7 +680,7 @@ spec:
           jq -r '."ca.crt"' < /tmp/secret-data.json | base64 -d > "${NIFI_HOME}"/tls/cert-manager/ca.crt
           touch /tmp/tls.crt.old
             
-          rm -f "${NIFI_HOME}/tls/truststore-new.jks"
+          rm -f "${NIFI_HOME}/tls/truststore-new.p12"
           for ca in "${NIFI_HOME}"/tls/*/ca.crt
           do
             ALIAS=$(echo $ca | awk -F "/" '{print $(NF-1) }' -)
@@ -688,14 +688,14 @@ spec:
                     -noprompt \
                     -trustcacerts \
                     -alias $ALIAS \
-                    -storetype JKS \
+                    -storetype PKCS12 \
                     -file $ca \
-                    -keystore "${NIFI_HOME}/tls/truststore-new.jks" \
+                    -keystore "${NIFI_HOME}/tls/truststore-new.p12" \
                     -storepass "{{ .Values.certManager.truststorePasswd }}"
           done
-          keytool -list -keystore "${NIFI_HOME}/tls/truststore-new.jks" \
+          keytool -list -keystore "${NIFI_HOME}/tls/truststore-new.p12" \
                         -storepass "{{ .Values.certManager.truststorePasswd }}"
-          mv "${NIFI_HOME}/tls/truststore-new.jks" "${NIFI_HOME}/tls/truststore.jks"
+          mv "${NIFI_HOME}/tls/truststore-new.p12" "${NIFI_HOME}/tls/truststore.p12"
 
           while :
           do
@@ -709,21 +709,21 @@ spec:
                                      -name    "${NODENAME}" \
                                      -out     "/tmp/tls.p12" \
                                      -passout "pass:{{ .Values.certManager.keystorePasswd }}"
-              rm -f "${NIFI_HOME}/tls/keystore-new.jks"
+              rm -f "${NIFI_HOME}/tls/keystore-new.p12"
               keytool -importkeystore \
                       -noprompt \
-                      -destkeystore "${NIFI_HOME}/tls/keystore-new.jks" \
+                      -destkeystore "${NIFI_HOME}/tls/keystore-new.p12" \
                       -srckeystore "/tmp/tls.p12" \
                       -srcstoretype PKCS12 \
-                      -deststoretype JKS \
+                      -deststoretype PKCS12 \
                       -srcstorepass "{{ .Values.certManager.keystorePasswd }}" \
                       -deststorepass "{{ .Values.certManager.keystorePasswd }}"
-              mv  "${NIFI_HOME}/tls/keystore-new.jks" "${NIFI_HOME}/tls/keystore.jks"
+              mv  "${NIFI_HOME}/tls/keystore-new.p12" "${NIFI_HOME}/tls/keystore.p12"
               mv /tmp/tls.crt /tmp/tls.crt.old
             fi
 
-            ls -l "${NIFI_HOME}/tls/keystore.jks"
-            keytool -list -keystore "${NIFI_HOME}/tls/keystore.jks" \
+            ls -l "${NIFI_HOME}/tls/keystore.p12"
+            keytool -list -keystore "${NIFI_HOME}/tls/keystore.p12" \
                           -storepass "{{ .Values.certManager.keystorePasswd }}"
 
             echo Starting to sleep for {{ .Values.certManager.refreshSeconds }} seconds at $(date)
