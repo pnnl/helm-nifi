@@ -26,9 +26,9 @@ jobs:
           helm repo update
           helm dep up
       - name: Install cert-manager
-        run: tests/05-install-cert-manager.bash
+        run: bash tests/05-install-cert-manager.bash
       - name: Install ALPHA and BRAVO instances of NiFi
-        run: tests/06-site-to-site.bash
+        run: bash tests/06-site-to-site.bash
       - name: Check deployment status
         run: |
           kubectl -n alpha rollout status --watch statefulset/nifi --timeout=5m

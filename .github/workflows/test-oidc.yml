@@ -37,7 +37,7 @@ jobs:
           kubectl rollout status --watch statefulset/browserless --timeout=5m
           kubectl rollout status --watch statefulset/keycloak --timeout=5m
           kubectl rollout status --watch statefulset/socks5 --timeout=5m
-          tests/04-oidc-keycloak-setup.bash
+          bash tests/04-oidc-keycloak-setup.bash
       - name: Install Nifi
         run: helm install nifi . -f tests/04-oidc-values.yaml
       - name: Check deployment status
@@ -91,8 +91,8 @@ jobs:
           kubectl rollout status --watch statefulset/browserless --timeout=5m
           kubectl rollout status --watch statefulset/keycloak --timeout=5m
           kubectl rollout status --watch statefulset/socks5 --timeout=5m
-          tests/04-oidc-keycloak-setup.bash
-          tests/05-install-cert-manager.bash
+          bash tests/04-oidc-keycloak-setup.bash
+          bash tests/05-install-cert-manager.bash
           minikube addons enable ingress
           kubectl apply -f tests/07-increase-webhook-timeout.yaml
       - name: Install Nifi and wait for start
