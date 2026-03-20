@@ -2,7 +2,6 @@ name: OIDC Logins
 
 on:
   push:
-  pull_request:
 
 jobs:
   oidc-insecure:

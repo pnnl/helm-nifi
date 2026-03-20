@@ -1,31 +1,23 @@
 name: Release Helm Chart
-
 on:
   push:
     tags:
       - 'v*'
-
 jobs:
   build:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
+      
       - name: Set up Helm
         uses: azure/setup-helm@v3
+        with:
+          version: 'v3.12.0'
           
       - name: Helm lint
-        run: helm lint
-
+        run: helm lint .
+      
       - name: Extract chart version from tag
         id: version
         run: |
@@ -48,24 +40,24 @@ jobs:
         run: |
           helm dependency update
           helm package . --version ${{ steps.version.outputs.VERSION }} --destination .
-
+      
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nifi
+          name: nifi-chart
           path: ./nifi-${{ steps.version.outputs.VERSION }}.tgz
-
+  
   deploy:
     if: ${{ github.ref_type == 'tag' }}
     runs-on: ubuntu-latest
-    needs:  [build]
+    needs: [build]
     steps:
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
-          name: nifi
+          name: nifi-chart
           path: .chart
-
+      
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -75,12 +67,9 @@ jobs:
                     
       - name: Push charts to GHCR
         run: |
-          shopt -s nullglob
-          files=$(find .chart/ -type f -name "*.tgz")
-          for pkg in $files; do
-            echo "Pushing ${pkg} to ghcr.io/${{ github.repository_owner }}/charts/helm-nifi"
-            if [ -z "${pkg:-}" ]; then
-              break
+          for pkg in .chart/*.tgz; do
+            if [ -f "$pkg" ]; then
+              echo "Pushing ${pkg} to OCI registry"
+              helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts"
             fi
-            helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts/helm-nifi"
           done
