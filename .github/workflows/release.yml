@@ -22,11 +22,9 @@ jobs:
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          VERSION=$(echo "$VERSION" | tr -d '[:space:]')
           echo "checking if tag version '$VERSION' matches helm chart"
           CHART_VERSION=$(helm show chart . | grep -E "^version:" | awk '{print $2}')
-          CHART_VERSION=$(echo "$CHART_VERSION" | tr -d '[:space:]')
-          if [[ CHART_VERSION != $VERSION ]]; then 
+          if [[ $CHART_VERSION != $VERSION ]]; then 
             echo "Error: Chart Version: $CHART_VERSION doesn't match Release Version: $VERSION!"
             exit 1
           fi
