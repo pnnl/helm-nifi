@@ -1,8 +1,8 @@
 name: Release Helm Chart
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      fix-actions-and-file-tree
 jobs:
   build:
     runs-on: ubuntu-22.04
