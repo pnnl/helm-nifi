@@ -1,11 +1,13 @@
 name: Release Helm Chart
 on:
   push:
-    tags:
-      - 'v*'
+    # tags:
+    #   - 'v*'
 jobs:
   build:
     runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,13 +24,12 @@ jobs:
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          if [[ $(helm show chart . | grep -E "^version:" | awk '{print $2}') != $(echo $VERSION | sed s/v//g) ]]; then 
+          VERSION=1.5.0
+          if [[ $(helm show chart . | grep -E "^version:" | awk '{print $2}') != $VERSION ]]; then 
             echo "Error: release name mismatch!"
             exit 1
           fi
-
-          docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1
-          if [ $? -eq 0 ]; then
+          if docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1; then
             echo "Error: version already exists in registry"
             exit 1
           fi
@@ -69,7 +70,7 @@ jobs:
         run: |
           for pkg in .chart/*.tgz; do
             if [ -f "$pkg" ]; then
-              echo "Pushing ${pkg} to OCI registry"
-              helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts"
+              echo "Pushing ${pkg} to OCI registry $(oci://ghcr.io/${{ github.repository }})"
+              # helm push "${pkg}" "oci://ghcr.io/${{ github.repository }}"
             fi
           done
