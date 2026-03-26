@@ -1,13 +1,11 @@
 name: Release Helm Chart
 on:
   push:
-    # tags:
-    #   - 'v*'
+    tags:
+      - 'v*'
 jobs:
   build:
     runs-on: ubuntu-22.04
-    outputs:
-      version: ${{ steps.version.outputs.VERSION }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -24,7 +22,6 @@ jobs:
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          VERSION=1.5.0
           if [[ $(helm show chart . | grep -E "^version:" | awk '{print $2}') != $VERSION ]]; then 
             echo "Error: release name mismatch!"
             exit 1
@@ -49,7 +46,7 @@ jobs:
           path: ./nifi-${{ steps.version.outputs.VERSION }}.tgz
   
   deploy:
-    # if: ${{ github.ref_type == 'tag' }}
+    if: ${{ github.ref_type == 'tag' }}
     runs-on: ubuntu-latest
     needs: [build]
     steps:
