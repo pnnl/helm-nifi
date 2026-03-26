@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nifi-chart
-          path: ./nifi-${{ steps.version.outputs.VERSION }}.tgz
+          path: ./helm-nifi-${{ steps.version.outputs.VERSION }}.tgz
   
   deploy:
     if: ${{ github.ref_type == 'tag' }}
@@ -69,7 +69,7 @@ jobs:
         run: |
           for pkg in .chart/*.tgz; do
             if [ -f "$pkg" ]; then
-              echo "Pushing ${pkg} to OCI registry $(oci://ghcr.io/${{ github.repository }})"
-              helm push "${pkg}" "oci://ghcr.io/${{ github.repository }}"
+              echo "Pushing ${pkg} to OCI registry $(oci://ghcr.io/${{ github.repository_owner }})"
+              helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}"
             fi
           done
