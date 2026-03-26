@@ -22,13 +22,13 @@ jobs:
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          if [[ $(helm show chart . | grep -E "^version:" | awk '{print $2}') != $(echo $VERSION | sed s/v//g) ]]; then 
-            echo "Error: release name mismatch!"
+          echo "checking if tag version '$VERSION' matches helm chart"
+          CHART_VERSION=$(helm show chart . | grep -E "^version:" | awk '{print $2}')
+          if [[ CHART_VERSION != $VERSION ]]; then 
+            echo "Error: Chart Version: $CHART_VERSION doesn't match Release Version: $VERSION!"
             exit 1
           fi
-
-          docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1
-          if [ $? -eq 0 ]; then
+          if docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1; then
             echo "Error: version already exists in registry"
             exit 1
           fi
@@ -69,7 +69,7 @@ jobs:
         run: |
           for pkg in .chart/*.tgz; do
             if [ -f "$pkg" ]; then
-              echo "Pushing ${pkg} to OCI registry"
-              helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts"
+              echo "Pushing ${pkg} to OCI registry $(oci://ghcr.io/${{ github.repository }})"
+              # helm push "${pkg}" "oci://ghcr.io/${{ github.repository }}"
             fi
           done
