@@ -15,7 +15,7 @@ This [Helm](https://helm.sh/) chart installs [Apache NiFi](https://nifi.apache.o
 ### Add Helm repository
 
 ```bash
-helm repo add pnnl https://pnnl.github.io/helm-nifi
+helm repo add pnnl oci://ghcr.io/pnnl/helm-nifi
 helm repo update
 ```
 
@@ -280,7 +280,7 @@ The following table lists the configurable parameters of the nifi chart and the 
 
 ## Troubleshooting
 
-Before [filing a bug report](https://github.com/cetic/helm-nifi/issues/new/choose), you may want to:
+Before [filing a bug report](https://github.com/pnnl/helm-nifi/issues/new/choose), you may want to:
 
 * check the [FAQ](/doc/FAQ.md)
 * check that [persistent storage](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) is configured on your cluster
@@ -316,7 +316,7 @@ TLS work/inspiration from https://github.com/sushilkm/nifi-chart.git.
 
 ## Contributing
 
-Feel free to contribute by making a [pull request](https://github.com/cetic/helm-nifi/pull/new/master).
+Feel free to contribute by making a [pull request](https://github.com/pnnl/helm-nifi/pull/new/master).
 
 Please read the official [Helm Contribution Guide](https://github.com/helm/charts/blob/master/CONTRIBUTING.md) from Helm for more information on how you can contribute to this Chart.
 
