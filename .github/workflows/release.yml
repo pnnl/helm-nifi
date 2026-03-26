@@ -22,8 +22,10 @@ jobs:
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          if [[ $(helm show chart . | grep -E "^version:" | awk '{print $2}') != $VERSION ]]; then 
-            echo "Error: release name mismatch!"
+          echo "checking if tag version '$VERSION' matches helm chart"
+          CHART_VERSION=$(helm show chart . | grep -E "^version:" | awk '{print $2}')
+          if [[ CHART_VERSION != $VERSION ]]; then 
+            echo "Error: Chart Version: $CHART_VERSION doesn't match Release Version: $VERSION!"
             exit 1
           fi
           if docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1; then
