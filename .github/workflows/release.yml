@@ -70,6 +70,6 @@ jobs:
           for pkg in .chart/*.tgz; do
             if [ -f "$pkg" ]; then
               echo "Pushing ${pkg} to OCI registry $(oci://ghcr.io/${{ github.repository }})"
-              # helm push "${pkg}" "oci://ghcr.io/${{ github.repository }}"
+              helm push "${pkg}" "oci://ghcr.io/${{ github.repository }}"
             fi
           done
