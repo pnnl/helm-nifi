@@ -24,7 +24,7 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "checking if tag version '$VERSION' matches helm chart"
           CHART_VERSION=$(helm show chart . | grep -E "^version:" | awk '{print $2}')
-          if [[ CHART_VERSION != $VERSION ]]; then 
+          if [[ $CHART_VERSION != $VERSION ]]; then 
             echo "Error: Chart Version: $CHART_VERSION doesn't match Release Version: $VERSION!"
             exit 1
           fi
