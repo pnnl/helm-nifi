@@ -2,7 +2,6 @@ name: Test-SingleUser
 
 on:
   push:
-  pull_request:
 
 jobs:
   test-singleuser:
@@ -20,7 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
-        working-directory: charts/nifi
         run: |
           sudo apt-get install -y jq
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -28,12 +26,10 @@ jobs:
           helm repo update
           helm dep up
       - name: Install openldap
-        working-directory: charts/nifi
         run: |
           kubectl apply -f tests/03-ldap
           kubectl rollout status --watch deployment/openldap --timeout=5m
       - name: Install Nifi
-        working-directory: charts/nifi
         run: helm install nifi .
       - name: Check deployment status
         run: |

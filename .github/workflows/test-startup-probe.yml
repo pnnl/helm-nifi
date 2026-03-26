@@ -2,7 +2,6 @@ name: Test-StartupProbe
 
 on:
   push:
-  pull_request:
 
 jobs:
 
@@ -21,7 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Install dependencies
-        working-directory: charts/nifi
         run: |
           sudo apt-get install -y jq
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -29,7 +27,6 @@ jobs:
           helm repo update
           helm dep up
       - name: Install Nifi
-        working-directory: charts/nifi
         run: helm install nifi . --set sts.startupProbe.enabled=true
       - name: Confirm rollout waits until JettyServer starts
         run: |
