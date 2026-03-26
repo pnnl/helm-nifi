@@ -21,19 +21,20 @@ jobs:
       - name: Extract chart version from tag
         id: version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          if [[ $(helm version --short) != $(echo $VERSION | sed s/v//g) ]]; then 
-            echo "Error: release name mismatch!"
-            exit 1
-          fi
+          # VERSION=${GITHUB_REF#refs/tags/v}
+          # if [[ $(helm version --short) != $(echo $VERSION | sed s/v//g) ]]; then 
+          #   echo "Error: release name mismatch!"
+          #   exit 1
+          # fi
 
-          docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1
-          if [ $? -eq 0 ]; then
-            echo "Error: version already exists in registry"
-            exit 1
-          fi
+          # docker manifest inspect ghcr.io/${{ github.repository }}:$VERSION > /dev/null 2>&1
+          # if [ $? -eq 0 ]; then
+          #   echo "Error: version already exists in registry"
+          #   exit 1
+          # fi
           
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION=$(helm version --short)" >> $GITHUB_OUTPUT
+          echo "DRYRUN"
         shell: bash
       
       - name: Package Helm chart
@@ -70,6 +71,7 @@ jobs:
           for pkg in .chart/*.tgz; do
             if [ -f "$pkg" ]; then
               echo "Pushing ${pkg} to OCI registry"
-              helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts"
+              # helm push "${pkg}" "oci://ghcr.io/${{ github.repository_owner }}/charts"
+              echo "DRYRUN"
             fi
           done
