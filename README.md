@@ -12,11 +12,8 @@ This [Helm](https://helm.sh/) chart installs [Apache NiFi](https://nifi.apache.o
 
 ## Installation
 
-### Add Helm repository
-
 ```bash
-helm repo add pnnl oci://ghcr.io/pnnl/helm-nifi
-helm repo update
+helm install nifi oci://ghcr.io/pnnl/helm-nifi
 ```
 
 ### Configure the chart
@@ -63,16 +60,9 @@ To enable the creation of prometheus metrics within Nifi we need to create a *Re
 
 If you plan to use Grafana for the visualization of the metrics data [the following dashboard](https://grafana.com/grafana/dashboards/12314) is compatible with the exposed metrics.
 
-### Install the chart
-
-Install the nifi helm chart with a release name `my-release`:
-
-```bash
-helm install my-release pnnl/nifi
-```
-
 ### Install from local clone
 
+helm pull oci://ghcr.io/pnnl/helm-nifi
 You will find how to perform an installation from a local clone on this [page](doc/INSTALLATION.md).
 
 ## Uninstallation
