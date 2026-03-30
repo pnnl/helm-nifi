@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nifi-chart
-          path: ./helm-nifi-${{ steps.version.outputs.VERSION }}.tgz
+          path: ./nifi-${{ steps.version.outputs.VERSION }}.tgz
   
   deploy:
     if: ${{ github.ref_type == 'tag' }}

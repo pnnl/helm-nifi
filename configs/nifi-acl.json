@@ -1,0 +1,5 @@
+{
+  "users": [{{- range $idx, $user := .Values.auth.managedUsers.users }}{{- if $idx }},{{- end}}{"identity": "{{ $user.identity }}"}{{- end }}],
+  "groups": [{{- range $idx, $group := .Values.auth.managedUsers.groups }}{{- if $idx }},{{- end}}{"identity": "{{ $group.identity }}", "users": {{ $group.users | toJson }}}{{- end }}],
+  "policies": [{{- range $idx, $policy := .Values.auth.managedUsers.authorizations.policies }}{{- if $idx }},{{- end}}{"resource": "{{ $policy.resource }}","action": "{{ $policy.action }}","users": {{ $policy.users | toJson }},"groups": {{ $policy.userGroups | toJson }}}{{- end }}]
+}

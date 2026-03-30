@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "apache-nifi.fullname" . }}-user-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nifi-user-manager
+  template:
+    metadata:
+      labels:
+        app: nifi-user-manager
+    spec:
+      initContainers:
+        - name: wait-for-service
+          image: curlimages/curl:8.10.1
+          command:
+            - sh
+            - -c
+            - |
+              URL="https://$NIFI_MANAGER_HOST:$NIFI_MANAGER_PORT/)nifi-api/tenants/users"
+              echo "Waiting for nifi (accepting 200 or 301)..."
+              for i in $(seq 1 60); do
+                CODE=$(curl -s -o /dev/null -k -w '%{http_code}' "$URL")
+                if [ "$CODE" != "000000" ]; then
+                  echo "Nifi is ready! (HTTP $CODE)"
+                  exit 0
+                fi
+                echo "Attempt $i: got HTTP $CODE, retrying in 2s..."
+                sleep 2
+              done
+              echo "Timed out waiting for $URL"
+              exit 1
+          env:
+          - name: "NIFI_MANAGER_HOST"
+            value: "nifi.default.svc.cluster.local"
+          - name: "NIFI_MANAGER_PORT"
+            value: "{{ .Values.properties.httpsPort }}"
+      containers:
+      - name: {{ template "apache-nifi.fullname" . }}-user-manager
+        imagePullPolicy: {{ .Values.auth.managedUsers.image.imagePullPolicy | default "IfNotPresent" | quote }}
+        image: docker.io/library/nifi-user-manager:1.0.0
+        command: 
+          - bash
+          - -c 
+          - |
+            cd /app/nifi_manager
+
+            while :
+            do
+              python3 main.py
+              echo Starting to sleep for {{ .Values.auth.managedUsers.refreshSeconds }} seconds at $(date)
+              sleep {{ .Values.auth.managedUsers.refreshSeconds }}
+            done
+        env:
+          - name: "NIFI_MANAGER_HOST"
+            value: "nifi.default.svc.cluster.local"
+          - name: "NIFI_MANAGER_PORT"
+            value: "{{ .Values.properties.httpsPort }}"
+          - name: "NIFI_MANAGER_ACL_FILE"
+            value: "/app/nifi_manager/acl/acl.json"
+          - name: "NIFI_MANAGER_CERT_PATH"
+            value: "/app/nifi_manager/certs/"
+          - name: "NIFI_MANAGER_TLS"
+            value: "true"
+          - name: "NIFI_MANAGER_VERIFY"
+            value: "{{ .Values.auth.managedUsers.verify }}"
+          - name: "DRY_RUN"
+            value: "{{ .Values.auth.managedUsers.dry_run }}"
+          - name: "PRUNE"
+            value: "{{ .Values.auth.managedUsers.prune }}"
+        volumeMounts: 
+        - name: acl
+          mountPath: /app/nifi_manager/acl/acl.json
+          subPath: acl.json
+        - name: certs
+          mountPath: /app/nifi_manager/certs/
+
+      volumes:
+      - name: acl
+        configMap:
+          name: {{ template "apache-nifi.fullname" . }}-config
+          items:
+            - key: "nifi-acl.json"
+              path: "acl.json"
+      - name: certs
+        secret:
+          secretName: nifi-user-manager-certs

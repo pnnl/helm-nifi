@@ -1,9 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 {{- $replicas := int .Values.replicaCount }}
 {{- $chart := .Chart.Name }}
 {{- $release := .Release.Name }}
 {{- $fullname := include "apache-nifi.fullname" . }}
 {{- $namespace := .Release.Namespace }}
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
@@ -45,13 +45,21 @@
     <userGroupProvider>
         <identifier>file-user-group-provider</identifier>
         <class>org.apache.nifi.authorization.FileUserGroupProvider</class>
-        <property name="Users File">./auth-conf/users.xml</property>
+        <property name="Users File">./conf/users.xml</property>
         <property name="Legacy Authorized Users File"></property>
+
+        {{- if .Values.properties.isNode }}
         {{- range $i := until $replicas }}
         <property name="Initial User Identity {{ $i }}">CN={{ $fullname }}-{{ $i }}.{{ $fullname }}-headless.{{ $namespace }}.svc.cluster.local, OU=NIFI</property>
         {{- end }}
-        {{- if and .Values.auth.ldap.enabled (not .Values.auth.admin) }}
+        {{- end }}
+
+        {{- if .Values.auth.managedUsers.enabled }}
+        <property name="Initial User Identity admin">{{.Values.auth.managedUsers.admin}}</property>
+        {{- else if .Values.auth.ldap.enabled }}
         <property name="Initial User Identity admin">{{.Values.auth.ldap.admin}}</property>
+        {{- else if .Values.auth.oidc.enabled }}
+        <property name="Initial User Identity admin">{{.Values.auth.oidc.admin}}</property>
         {{- else }}
         <property name="Initial User Identity admin">{{ .Values.auth.admin }}</property>
         {{- end}}
@@ -154,7 +162,6 @@
         <property name="Group Member Attribute"></property>
         <property name="Group Member Attribute - Referenced User Attribute"></property>
     </userGroupProvider>
-    {{- end}}
 
     <!--
         The CompositeUserGroupProvider will provide support for retrieving users and groups from multiple sources.
@@ -164,7 +171,6 @@
             NOTE: Any identity mapping rules specified in nifi.properties are not applied in this implementation. This behavior
             would need to be applied by the base implementation.
     -->
-    {{- if .Values.auth.ldap.enabled}}
     <userGroupProvider>
         <identifier>composite-configurable-user-group-provider</identifier>
         <class>org.apache.nifi.authorization.CompositeConfigurableUserGroupProvider</class>
@@ -222,14 +228,18 @@
         <class>org.apache.nifi.authorization.FileAccessPolicyProvider</class>
         <property name="User Group Provider">file-user-group-provider</property>
         <property name="Authorizations File">./auth-conf/authorizations.xml</property>
-        {{- if and .Values.auth.ldap.enabled (not .Values.auth.admin) }}
+        {{- if .Values.auth.ldap.enabled }}
         <property name="Initial Admin Identity">{{.Values.auth.ldap.admin}}</property>
+        {{ else if .Values.auth.oidc.enabled }}
+        <property name="Initial Admin Identity">{{ .Values.auth.oidc.admin }}</property>
         {{- else }}
         <property name="Initial Admin Identity">{{ .Values.auth.admin }}</property>
         {{- end}}
         <property name="Legacy Authorized Users File"></property>
+        {{- if .Values.properties.isNode }}
         {{- range $i := until $replicas }}
         <property name="Node Identity {{ $i }}">CN={{ $fullname }}-{{ $i }}.{{ $fullname }}-headless.{{ $namespace }}.svc.cluster.local, OU=NIFI</property>
+        {{- end }}
         {{- end }}
         <property name="Node Identity"></property>
     </accessPolicyProvider>
@@ -273,7 +283,7 @@
         <identifier>file-provider</identifier>
         <class>org.apache.nifi.authorization.FileAuthorizer</class>
         <property name="Authorizations File">./auth-conf/authorizations.xml</property>
-        <property name="Users File">./auth-conf/users.xml</property>
+        <property name="Users File">./conf/users.xml</property>
         <property name="Initial Admin Identity">{{.Values.auth.ldap.admin}}</property>
         <property name="Legacy Authorized Users File"></property>
 
