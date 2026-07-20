@@ -228,7 +228,9 @@
         <class>org.apache.nifi.authorization.FileAccessPolicyProvider</class>
         <property name="User Group Provider">file-user-group-provider</property>
         <property name="Authorizations File">./auth-conf/authorizations.xml</property>
-        {{- if .Values.auth.ldap.enabled }}
+        {{- if .Values.auth.managedUsers.enabled }}
+        <property name="Initial Admin Identity">{{.Values.auth.managedUsers.admin}}</property>
+        {{- else if .Values.auth.ldap.enabled }}
         <property name="Initial Admin Identity">{{.Values.auth.ldap.admin}}</property>
         {{ else if .Values.auth.oidc.enabled }}
         <property name="Initial Admin Identity">{{ .Values.auth.oidc.admin }}</property>

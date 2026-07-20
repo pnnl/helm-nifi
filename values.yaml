@@ -135,7 +135,6 @@ auth:
 
   # Automaticaly disabled if OIDC or LDAP enabled
   singleUser:
-    enabled: false
     username: username
     password: changemechangeme # Must to have at least 12 characters
 
@@ -157,11 +156,12 @@ auth:
     groupSearchScope: ONE_LEVEL # Search scope for searching groups (ONE_LEVEL, OBJECT, or SUBTREE). Required if searching groups.
 
   oidc:
-    enabled: false 
+    enabled: false
     discoveryUrl: #http://<oidc_provider_address>:<oidc_provider_port>/auth/realms/<client_realm>/.well-known/openid-configuration
     clientId: #<client_name_in_oidc_provider>
     clientSecret: #<client_secret_in_oidc_provider>
     claimIdentifyingUser: email
+    claimGroups: groups
     admin: nifi@example.com
     preferredJwsAlgorithm:
     ## Request additional scopes, for example profile
