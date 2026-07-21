@@ -135,7 +135,7 @@ spec:
 {{- if .Values.sts.useHostNetwork }}
           FQDN="0.0.0.0"
 {{- else }}
-          FQDN="{{ template "apache-nifi.fullname" $ }}"
+          FQDN=$(hostname -f)
 {{- end }}
 
           cat "${NIFI_HOME}/conf/nifi.temp" > "${NIFI_HOME}/conf/nifi.properties"
@@ -175,7 +175,7 @@ spec:
           prop_replace nifi.remote.input.host ${FQDN}
           prop_replace nifi.cluster.node.address ${FQDN}
           prop_replace nifi.zookeeper.connect.string ${NIFI_ZOOKEEPER_CONNECT_STRING}
-          prop_replace nifi.web.http.host ${FQDN}
+          prop_replace nifi.web.http.host "{{ template "apache-nifi.fullname" $ }}.{{ $.Release.Namespace }}.svc.{{ $.Values.certManager.clusterDomain }}"
 
 {{- if .Values.properties.webProxyHost }}
           # Update nifi.properties for web ui proxy hostname
