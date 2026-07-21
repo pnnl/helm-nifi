@@ -154,4 +154,32 @@ roleRef:
   kind: Role
   name: {{ template "apache-nifi.fullname" $ }}-secret-reader
   apiGroup: rbac.authorization.k8s.io
+---
+{{ if .Values.auth.managedUsers.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: nifi-user-manager 
+  namespace: {{ $.Release.Namespace }}
+spec:
+  duration: {{ $.Values.certManager.certDuration }}
+  commonName: nifi-user-manager 
+  subject:
+    organizationalUnits:
+    - NIFI
+  secretName: nifi-user-manager-certs
+  privateKey:
+    rotationPolicy: Always
+  usages:
+    - digital signature
+    - content commitment
+    - key encipherment
+    - data encipherment
+    - key agreement
+    - server auth
+    - client auth
+  issuerRef:
+    name: {{ template "apache-nifi.fullname" $ }}-ca
+    kind: Issuer
+{{/* if .Values.auth.managedUsers.enabled */}}{{ end }}
 {{/* if .Values.certManager.enabled */}}{{ end }}

@@ -166,6 +166,28 @@ auth:
     ## Request additional scopes, for example profile
     additionalScopes:
 
+  managedUsers: 
+    enabled: false
+    image: 
+      registry: "ghcr.io"
+      repository: "pnnl/nifi-manager"
+      tag : "1.0.0"
+      pullPolicy: "IfNotPresent"
+
+    admin: "CN=nifi-user-manager, OU=NIFI" 
+    refreshSeconds: 300
+    log_level: INFO
+    verify: True
+    dry_run: False 
+    prune: True
+
+    users: []
+
+    groups: []
+
+    authorizations:
+      policies: []
+
 openldap:
   enabled: false
   persistence:
